@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Result - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand d-flex align-items-center" href="/admin/students">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li><a class="nav-link" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-container">
+        <header>
+            <h1>Update Result for {{ student.name }}</h1>
+        </header>
+
+        <form method="POST">
+            <div class="mb-3">
+                <input type="text" name="result" class="form-control" placeholder="Enter new result" value="{{ student.result }}" required>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+        </form>
+    </div>
+</body>
+</html>

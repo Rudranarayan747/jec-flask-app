@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Students - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand d-flex align-items-center" href="/admin">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li><a class="nav-link" href="/admin/add_notice">Add Notice</a></li>
+            <li><a class="nav-link" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-container">
+        <header>
+            <h1>Manage Students</h1>
+        </header>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Result</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{ s.id }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.result }}</td>
+                    <td>
+                        <a href="/admin/update_result/{{ s.id }}" class="btn btn-primary btn-sm">Update Result</a>
+                        <a href="/admin/delete_student/{{ s.id }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

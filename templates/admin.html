@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand d-flex align-items-center" href="/admin">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/admin/add_notice">Add Notice</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-container">
+        <header>
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <h1>Jhadeswar Engineering College, Balasore</h1>
+        </header>
+
+        <h2>Admin Dashboard</h2>
+        <p>Welcome, Administrator. You can manage notices here.</p>
+
+        <a class="btn btn-success mb-3" href="/admin/add_notice">Add New Notice</a>
+
+        <h3>All Notices</h3>
+        <ul class="list-group">
+            {% for n in notices %}
+                <li class="list-group-item">
+                    <h5>{{ n.title }}</h5>
+                    <p>{{ n.content }}</p>
+                    <small class="text-muted">Posted on {{ n.date_posted.strftime('%d %B %Y') }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JEC Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li><a class="nav-link" href="/login">Login</a></li>
+            <li><a class="nav-link" href="/register">Register</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-container text-center">
+        <h2>Welcome to JEC Portal</h2>
+        <p>Login or Register to access your dashboard.</p>
+    </div>
+</body>
+</html>

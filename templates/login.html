@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-container">
+        <header>
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <h1>Jhadeswar Engineering College</h1>
+        </header>
+
+        <h2>Login</h2>
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Registration/Admin ID" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+</body>
+</html>
