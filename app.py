@@ -7,6 +7,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///jec.db"
 app.config["SECRET_KEY"] = "secret"
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
+login_manager.login_view = "login"
 
 # ---------------- Models ----------------
 class Student(UserMixin, db.Model):
@@ -28,7 +29,7 @@ def load_user(user_id):
 
 # ---------------- Routes ----------------
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -43,8 +44,7 @@ def login():
                 return redirect(url_for("admin_dashboard"))
             else:
                 return redirect(url_for("student_dashboard"))
-        else:
-            return render_template("login.html", error="Invalid credentials")
+        return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -68,11 +68,13 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    return redirect(url_for("home"))
 
 @app.route("/student")
 @login_required
 def student_dashboard():
+    if current_user.role != "student":
+        return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
     student = Student.query.get(current_user.id)
     return render_template("student.html", student=student, notices=notices)
@@ -83,7 +85,8 @@ def admin_dashboard():
     if current_user.role != "admin":
         return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
-    return render_template("admin.html", notices=notices)
+    students = Student.query.filter(Student.role == "student").all()
+    return render_template("admin.html", notices=notices, students=students)
 
 @app.route("/admin/add_notice", methods=["GET", "POST"])
 @login_required
@@ -99,21 +102,6 @@ def add_notice():
         return redirect(url_for("admin_dashboard"))
     return render_template("add_notice.html")
 
-@app.route("/notices")
-@login_required
-def notices():
-    all_notices = Notice.query.order_by(Notice.date_posted.desc()).all()
-    return render_template("notices.html", notices=all_notices)
-
-# ---------------- Student Management ----------------
-@app.route("/admin/students")
-@login_required
-def manage_students():
-    if current_user.role != "admin":
-        return "Access denied"
-    students = Student.query.filter(Student.role == "student").all()
-    return render_template("manage_students.html", students=students)
-
 @app.route("/admin/update_result/<reg>", methods=["GET", "POST"])
 @login_required
 def update_result(reg):
@@ -123,14 +111,10 @@ def update_result(reg):
     if not student:
         return "Student not found"
     if request.method == "POST":
-        new_result = request.form["result"]
-        student.result = new_result
+        student.result = request.form["result"]
         db.session.commit()
-        return redirect(url_for("manage_students"))
+        return redirect(url_for("admin_dashboard"))
     return render_template("update_result.html", student=student)
-@app.route("/")
-def home():
-    return render_template("index.html")
 
 @app.route("/admin/delete_student/<reg>")
 @login_required
@@ -141,7 +125,7 @@ def delete_student(reg):
     if student:
         db.session.delete(student)
         db.session.commit()
-    return redirect(url_for("manage_students"))
+    return redirect(url_for("admin_dashboard"))
 
 # ---------------- Initialize ----------------
 with app.app_context():
@@ -159,3 +143,4 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
+s
