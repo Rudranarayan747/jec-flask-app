@@ -1,87 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jhadeswar Engineering College, Balasore</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background: #004080;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        nav {
-            background: #0066cc;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        section {
-            padding: 30px;
-            text-align: center;
-        }
-        footer {
-            background: #004080;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        .highlight {
-            font-size: 18px;
-            color: #333;
-        }
-    </style>
+    <title>JEC Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Jhadeswar Engineering College, Balasore</h1>
-        <p>Shaping Engineers for Tomorrow</p>
-    </header>
-
-    <nav>
-        <a href="{{ url_for('student_dashboard') }}">Student Login</a>
-        <a href="{{ url_for('admin_dashboard') }}">Admin Login</a>
-        <a href="{{ url_for('add_notice') }}">Notices</a>
+    <nav class="navbar">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li><a class="nav-link" href="/login">Login</a></li>
+            <li><a class="nav-link" href="/register">Register</a></li>
+        </ul>
     </nav>
 
-    <section>
-        <h2>About JEC Balasore</h2>
-        <p class="highlight">
-            Jhadeswar Engineering College (JEC), located in Balasore, Odisha, is dedicated to providing quality technical education and fostering innovation. 
-            The college offers undergraduate and postgraduate programs across multiple engineering disciplines.
-        </p>
-        <p>
-            With experienced faculty members, modern laboratories, and a focus on holistic development, JEC Balasore prepares students to excel in industry and research. 
-            The institution emphasizes discipline, knowledge, and innovation as its guiding principles.
-        </p>
-    </section>
-
-    <section>
-        <h2>Quick Links</h2>
-        <p>
-            <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a> | 
-            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a> | 
-            <a href="{{ url_for('add_notice') }}">View Notices</a>
-        </p>
-    </section>
-
-    <footer>
-        <p>&copy; 2026 Jhadeswar Engineering College, Balasore. All Rights Reserved.</p>
-    </footer>
+    <div class="page-container text-center">
+        <h2>Welcome to JEC Portal</h2>
+        <p>Login or Register to access your dashboard.</p>
+    </div>
 </body>
 </html>
-
-
