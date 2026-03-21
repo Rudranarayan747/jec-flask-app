@@ -114,8 +114,6 @@ def update_result(reg):
     if not student:
         return "Student not found"
     if request.method == "POST":
-        if "result" not in request.form:
-            return "Form error: missing result field"
         student.result = request.form["result"]
         db.session.commit()
         flash(f"Result updated for {student.name}", "success")
@@ -150,4 +148,6 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
 
