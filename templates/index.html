@@ -1,24 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JEC Portal</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Welcome to JEC Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #003366;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            background: #0055a5;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        section {
+            padding: 30px;
+            text-align: center;
+        }
+        footer {
+            background: #003366;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .highlight {
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-            <span>Jhadeswar Engineering College</span>
-        </a>
-        <ul class="navbar-nav ms-auto">
-            <li><a class="nav-link" href="/login">Login</a></li>
-            <li><a class="nav-link" href="/register">Register</a></li>
-        </ul>
+    <header>
+        <h1>Jabalpur Engineering College (JEC)</h1>
+        <p>Empowering Education, Innovation, and Excellence</p>
+    </header>
+
+    <nav>
+        <a href="{{ url_for('student_dashboard') }}">Student Login</a>
+        <a href="{{ url_for('admin_dashboard') }}">Admin Login</a>
+        <a href="{{ url_for('add_notice') }}">Notices</a>
     </nav>
 
-    <div class="page-container text-center">
-        <h2>Welcome to JEC Portal</h2>
-        <p>Login or Register to access your dashboard.</p>
-    </div>
+    <section>
+        <h2>About JEC</h2>
+        <p class="highlight">
+            Established in 1947, Jabalpur Engineering College (JEC) is one of the oldest and most prestigious engineering institutions in India. 
+            It offers undergraduate, postgraduate, and doctoral programs across multiple engineering disciplines.
+        </p>
+        <p>
+            JEC is committed to nurturing talent, fostering innovation, and contributing to technological advancement. 
+            With highly qualified faculty members and state-of-the-art facilities, JEC continues to shape future engineers and leaders.
+        </p>
+    </section>
+
+    <section>
+        <h2>Quick Links</h2>
+        <p>
+            <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a> | 
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a> | 
+            <a href="{{ url_for('add_notice') }}">View Notices</a>
+        </p>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Jabalpur Engineering College. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>
