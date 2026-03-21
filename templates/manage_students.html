@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manage Students</title>
+    <title>Manage Students - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h2>Manage Students</h2>
-    <table border="1">
-        <tr>
-            <th>Reg No</th>
-            <th>Name</th>
-            <th>Result</th>
-            <th>Attendance</th>
-            <th>Actions</th>
-        </tr>
-        {% for student in students %}
-        <tr>
-            <td>{{ student.reg_no }}</td>
-            <td>{{ student.name }}</td>
-            <td>{{ student.result }}</td>
-            <td>{{ student.attendance }}%</td>
-            <td>
-                <a href="{{ url_for('update_result', reg=student.reg_no) }}">Update Result</a>
-            </td>
-        </tr>
-        {% endfor %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.id }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.result }}</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('update_result', reg=student.id) }}">Update</a>
+                    <a class="btn btn-danger btn-sm" href="{{ url_for('delete_student', reg=student.id) }}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
 </body>
 </html>
