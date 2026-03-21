@@ -61,8 +61,9 @@
                     <td>{{ student.result }}</td>
                     <td>{{ student.attendance }}%</td>
                     <td>
-                        <a class="btn btn-primary btn-sm" href="{{ url_for('update_result', reg=student.reg_no) }}">Update</a>
-                        <a class="btn btn-danger btn-sm" href="{{ url_for('delete_student', reg=student.reg_no) }}">Delete</a>
+                       <a class="btn btn-primary btn-sm" href="{{ url_for('update_result', reg=student.id) }}">Update</a>
+                       <a class="btn btn-danger btn-sm" href="{{ url_for('delete_student', reg=student.id) }}">Delete</a>
+
                     </td>
                 </tr>
                 {% endfor %}
