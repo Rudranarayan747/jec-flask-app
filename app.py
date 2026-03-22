@@ -132,6 +132,39 @@ def delete_student(reg):
         db.session.commit()
         flash(f"Student {student.name} deleted.", "warning")
     return redirect(url_for("admin_dashboard"))
+    
+
+# ---------------- New Upload & Events Routes ----------------
+@app.route("/admin/upload", methods=["GET", "POST"])
+@login_required
+def upload_media():
+    if current_user.role != "admin":
+        return "Access denied"
+    if request.method == "POST":
+        if "file" not in request.files:
+            flash("No file part", "danger")
+            return redirect(request.url)
+        file = request.files["file"]
+        if file.filename == "":
+            flash("No selected file", "danger")
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+            file.save(save_path)
+            flash("File uploaded successfully!", "success")
+            return redirect(url_for("events"))
+    return render_template("upload_media.html")
+
+@app.route("/events")
+@login_required
+def events():
+    files = []
+    if os.path.exists(app.config["UPLOAD_FOLDER"]):
+        files = os.listdir(app.config["UPLOAD_FOLDER"])
+    return render_template("events.html", files=files)
+
 
 # ---------------- Initialize ----------------
 with app.app_context():
