@@ -145,6 +145,5 @@ with app.app_context():
             content="Internal 1 for 2nd Semester will be held from 24th March to 26th March."
         ))
     db.session.commit()
-i am facing problem when i used to update reulst or manage student it is showing url not found
 if __name__ == "__main__":
     app.run(debug=True) 
