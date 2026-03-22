@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Update Result</title>
+    <title>Update Result - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Update Result</h1>
-    <p>Updating result for <strong>{{ student.name }}</strong> (Reg No: {{ student.id }})</p>
+    <h2>Update Result for {{ student.name }} ({{ student.id }})</h2>
     <form method="POST">
         <label for="result">Result:</label>
-        <input type="text" id="result" name="result" value="{{ student.result }}" required>
-        <button type="submit">Save</button>
+        <input type="text" name="result" value="{{ student.result }}" required>
+        <br><br>
+        <button type="submit" class="btn btn-success">Save</button>
     </form>
-    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    <p><a href="{{ url_for('manage_students') }}">Back to Manage Students</a></p>
 </body>
 </html>
