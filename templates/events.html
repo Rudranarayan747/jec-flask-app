@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Gallery - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .gallery img, .gallery video {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Event Gallery</h2>
+    <div class="gallery">
+        {% for file in files %}
+            {% if file.endswith(('.png','.jpg','.jpeg','.gif')) %}
+                <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="Event Photo">
+            {% elif file.endswith(('.mp4','.avi','.mov')) %}
+                <video controls>
+                    <source src="{{ url_for('static', filename='uploads/' ~ file) }}">
+                    Your browser does not support the video tag.
+                </video>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <p><a href="{{ url_for('student_dashboard') }}">Back to Student Dashboard</a></p>
+</body>
+</html>
