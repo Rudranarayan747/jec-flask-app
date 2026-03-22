@@ -3,18 +3,74 @@
 <head>
     <title>Login - JEC Portal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            width: 400px;
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #003366;
+        }
+        .login-container label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: left;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 16px;
+        }
+        .login-container button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            background: #0055a5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background: #003366;
+        }
+        .login-container p {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Login</h2>
-    <form method="POST">
-        <label for="username">Registration No:</label>
-        <input type="text" id="username" name="username" required><br><br>
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo" style="width:80px; margin-bottom:15px;">
+        <h2>Login</h2>
+        <form method="POST">
+            <label for="username">Registration No:</label>
+            <input type="text" id="username" name="username" required>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
 
-        <button type="submit">Login</button>
-    </form>
-    <p><a href="{{ url_for('register') }}">Register</a></p>
+            <button type="submit">Login</button>
+        </form>
+        <p><a href="{{ url_for('register') }}">Register</a></p>
+    </div>
 </body>
 </html>
