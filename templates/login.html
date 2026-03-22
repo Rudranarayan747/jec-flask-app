@@ -32,7 +32,7 @@
             font-weight: bold;
             text-align: left;
         }
-        .login-container input, .login-container select {
+        .login-container input {
             width: 100%;
             padding: 12px;
             margin-top: 8px;
@@ -52,6 +52,9 @@
         .login-container button:hover {
             background: #003366;
         }
+        .login-container p {
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -59,21 +62,15 @@
         <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo" style="width:80px; margin-bottom:15px;">
         <h2>Login</h2>
         <form method="POST">
-            <label for="username">Registration No/Admin:</label>
+            <label for="username">Registration No:</label>
             <input type="text" id="username" name="username" required>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
 
-            <label for="role">Login As:</label>
-            <select id="role" name="role" required>
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-            </select>
-
             <button type="submit">Login</button>
         </form>
-        <p><a href="{{ url_for('register') }}">Register as Student</a></p>
+        <p><a href="{{ url_for('register') }}">Register</a></p>
     </div>
 </body>
 </html>
