@@ -3,81 +3,25 @@
 <head>
     <title>Welcome to JEC Portal</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background: #003366;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-        .logos-left {
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            display: flex;
-            flex-direction: row; /* side by side */
-            align-items: center;
-            gap: 15px;
-        }
-        .logos-left img {
-            width: 70px;
-            height: auto;
-        }
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-        .jec-logo {
-            width: 90px;
-            height: auto;
-        }
-        nav {
-            background: #0055a5;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        section {
-            padding: 30px;
-            text-align: center;
-        }
-        footer {
-            background: #003366;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        .highlight {
-            font-size: 18px;
-            color: #333;
-        }
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+        header { background: #003366; color: white; padding: 20px; text-align: center; position: relative; }
+        .logos-left { position: absolute; top: 10px; left: 20px; display: flex; flex-direction: row; align-items: center; gap: 15px; }
+        .logos-left img { width: 70px; height: auto; }
+        .header-content { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        .jec-logo { width: 90px; height: auto; }
+        nav { background: #0055a5; padding: 10px; text-align: center; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+        section { padding: 30px; text-align: center; }
+        footer { background: #003366; color: white; text-align: center; padding: 15px; position: fixed; bottom: 0; width: 100%; }
+        .highlight { font-size: 18px; color: #333; }
     </style>
 </head>
 <body>
     <header>
-        <!-- AICTE and BPUT logos side by side -->
         <div class="logos-left">
             <img src="{{ url_for('static', filename='aicte_logo.png') }}" alt="AICTE Logo">
             <img src="{{ url_for('static', filename='bput_logo.png') }}" alt="BPUT Logo">
         </div>
-
-        <!-- JEC logo beside heading -->
         <div class="header-content">
             <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo" class="jec-logo">
             <div class="header-text">
@@ -90,41 +34,15 @@
     <nav>
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a>
+        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
         <a href="{{ url_for('add_notice') }}">Notices</a>
         <a href="{{ url_for('events') }}">Events Gallery</a>
     </nav>
 
     <section>
         <h2>About JEC</h2>
-        <p class="highlight">
-            Jhadeswar Engineering College (JEC) in Balasore, Odisha, is a relatively new institution established in 2025, 
-            while the Jhadeswar Institute of Engineering & Technology (JIET) has been operating since 2009.
-        </p>
-        <p>
-            JEC is committed to nurturing talent, fostering innovation, and contributing to technological advancement. 
-            With highly qualified faculty members and state-of-the-art facilities, JEC continues to shape future engineers and leaders.
-        </p>
-        <p>
-            🎓 Leadership<br>
-            Chairman: Mr. Paramananda Sanatara<br>
-            Director-cum-Principal: Prof. (Dr.) Sarat Kumar Mishra<br>
-            Managing Director (MD): Mr. Sarbeswar Sanatara
-        </p>
-        <p>
-            📚 Academics<br>
-            Offers Undergraduate Engineering Programs (C.S.E(120), E.E(120), M.E(60), C.E(60))<br>
-            Focus on research, innovation, and industry readiness
-        </p>
-    </section>
-
-    <section>
-        <h2>Quick Links</h2>
-        <p>
-            <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a> | 
-            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a> | 
-            <a href="{{ url_for('add_notice') }}">View Notices</a> | 
-            <a href="{{ url_for('events') }}">Events Gallery</a>
-        </p>
+        <p class="highlight">Jhadeswar Engineering College (JEC) in Balasore, Odisha, is a relatively new institution established in 2025...</p>
     </section>
 
     <footer>
