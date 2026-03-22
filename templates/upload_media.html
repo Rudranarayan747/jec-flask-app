@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Event Media - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Upload Event Photo/Video</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" required><br><br>
+        <button type="submit">Upload</button>
+    </form>
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+</body>
+</html>
