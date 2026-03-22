@@ -3,37 +3,53 @@
 <head>
     <title>Admin Dashboard - JEC</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #003366;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            background: #0055a5;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        section {
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
         <h1>Admin Dashboard</h1>
+        <p>Manage JEC Portal</p>
     </header>
 
-    <h2>Notices</h2>
-    <a href="{{ url_for('add_notice') }}">Add New Notice</a>
-    <ul>
-        {% for n in notices %}
-        <li><strong>{{ n.title }}</strong> - {{ n.date_posted.strftime('%Y-%m-%d') }}<br>{{ n.content }}</li>
-        {% endfor %}
-    </ul>
+    <nav>
+        <a href="{{ url_for('add_notice') }}">Add Notice</a>
+        <a href="{{ url_for('update_result', reg='') }}">Update Result</a>
+        <a href="{{ url_for('delete_student', reg='') }}">Delete Student</a>
+        <!-- New Upload Event Media link -->
+        <a href="{{ url_for('upload_media') }}">Upload Event Media</a>
+    </nav>
 
-    <h2>Manage Students</h2>
-    <table border="1">
-        <tr><th>Reg No</th><th>Name</th><th>Result</th><th>Actions</th></tr>
-        {% for student in students %}
-        <tr>
-            <td>{{ student.id }}</td>
-            <td>{{ student.name }}</td>
-            <td>{{ student.result }}</td>
-            <td>
-                <a href="{{ url_for('update_result', reg=student.id) }}">Update</a>
-                <a href="{{ url_for('delete_student', reg=student.id) }}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    <section>
+        <h2>Welcome, Admin</h2>
+        <p>Use the navigation above to manage notices, results, students, and event media.</p>
+    </section>
 </body>
 </html>
