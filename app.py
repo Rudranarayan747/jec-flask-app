@@ -134,27 +134,26 @@ def delete_student(reg):
     return redirect(url_for("admin_dashboard"))
     
 
-# ---------------- New Upload & Events Routes ----------------
 @app.route("/admin/upload", methods=["GET", "POST"])
 @login_required
 def upload_media():
     if current_user.role != "admin":
         return "Access denied"
     if request.method == "POST":
-        if "file" not in request.files:
-            flash("No file part", "danger")
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            flash("No file selected", "danger")
             return redirect(request.url)
-        file = request.files["file"]
-        if file.filename == "":
-            flash("No selected file", "danger")
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
+        if allowed_file(file.filename):
             filename = secure_filename(file.filename)
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
             file.save(save_path)
             flash("File uploaded successfully!", "success")
             return redirect(url_for("events"))
+        else:
+            flash("File type not allowed", "danger")
+            return redirect(request.url)
     return render_template("upload_media.html")
 
 @app.route("/events")
