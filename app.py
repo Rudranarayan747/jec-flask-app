@@ -63,6 +63,12 @@ def admin_dashboard():
         flash("Please log in as admin to access this page", "warning")
         return redirect(url_for("login"))
     return render_template("admin.html")
+@app.route("/update_result")
+def update_result():
+    if "user" not in session or session.get("role") != "admin":
+        flash("Access denied", "danger")
+        return redirect(url_for("login"))
+    return "Update Result page coming soon"
 
 # ---------------- Upload Media ----------------
 @app.route("/admin/upload", methods=["GET", "POST"])
