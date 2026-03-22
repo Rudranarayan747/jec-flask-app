@@ -5,16 +5,41 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Add Notice</h2>
-    <form method="POST">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" required><br><br>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('admin_dashboard') }}">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <span>Jhadeswar Engineering College</span>
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
 
-        <label for="content">Content:</label>
-        <textarea id="content" name="content" rows="5" required></textarea><br><br>
+    <div class="page-container">
+        <header>
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+            <h1>Jhadeswar Engineering College, Balasore</h1>
+        </header>
 
-        <button type="submit">Add Notice</button>
-    </form>
-    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+        <h2>Add Notice</h2>
+        <form method="POST" class="form-container">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required><br><br>
+
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" rows="5" required></textarea><br><br>
+
+            <!-- Optional category dropdown -->
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option value="Exam">Exam</option>
+                <option value="Holiday">Holiday</option>
+                <option value="Event">Event</option>
+            </select><br><br>
+
+            <button type="submit" class="btn btn-success">Add Notice</button>
+        </form>
+    </div>
 </body>
 </html>
