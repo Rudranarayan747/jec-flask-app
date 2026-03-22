@@ -14,6 +14,29 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative; /* allows logos to be positioned inside */
+        }
+        .logos-left {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            display: flex;
+            flex-direction: column; /* stack vertically */
+            gap: 10px;
+        }
+        .logos-left img {
+            width: 70px;
+            height: auto;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px; /* space between logo and text */
+        }
+        .jec-logo {
+            width: 90px;
+            height: auto;
         }
         nav {
             background: #0055a5;
@@ -47,15 +70,28 @@
 </head>
 <body>
     <header>
-        <h1>Jhadeswar Engineering College (JEC)</h1>
-        <p>Empowering Education, Innovation, and Excellence</p>
+        <!-- AICTE and BPUT logos stacked on left -->
+        <div class="logos-left">
+            <img src="{{ url_for('static', filename='aicte_logo.png') }}" alt="AICTE Logo">
+            <img src="{{ url_for('static', filename='bput_logo.png') }}" alt="BPUT Logo">
+        </div>
+
+        <!-- JEC logo beside heading -->
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo" class="jec-logo">
+            <div class="header-text">
+                <h1>Jhadeswar Engineering College (JEC)</h1>
+                <p>Empowering Education, Innovation, and Excellence</p>
+            </div>
+        </div>
     </header>
 
     <nav>
-        <a href="{{ url_for('student_dashboard') }}">Student Login</a>
-        <a href="{{ url_for('admin_dashboard') }}">Admin Login</a>
-        <a href="{{ url_for('add_notice') }}">Notices</a>
+        <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a>
+        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        <a href="{{ url_for('add_notice') }}">Notices</a>
     </nav>
 
     <section>
@@ -63,23 +99,21 @@
         <p class="highlight">
             Jhadeswar Engineering College (JEC) in Balasore, Odisha, is a relatively new institution established in 2025, 
             while the Jhadeswar Institute of Engineering & Technology (JIET) has been operating since 2009.
-            Both serve as technical education hubs in northern Odisha, but they differ in scope, affiliation, and history.
         </p>
         <p>
             JEC is committed to nurturing talent, fostering innovation, and contributing to technological advancement. 
-           With highly qualified faculty members and state-of-the-art facilities, JEC continues to shape future engineers and leaders.
-          </p>
+            With highly qualified faculty members and state-of-the-art facilities, JEC continues to shape future engineers and leaders.
+        </p>
         <p>
-            🎓 Leadership
-Chairman: Mr. Paramananda Sanatara
-Director-cum-Principal: Prof. (Dr.) Sarat Kumar Mishra
-Managing Director (MD):Mr.Sarbeswar Sanatara
-            </p>
+            🎓 Leadership<br>
+            Chairman: Mr. Paramananda Sanatara<br>
+            Director-cum-Principal: Prof. (Dr.) Sarat Kumar Mishra<br>
+            Managing Director (MD): Mr. Sarbeswar Sanatara
+        </p>
         <p>
-            📚 Academics
-Offers Undergraduate Engineering Programs (C.S.E(120),E.E(120),M.E(60),C.E(60))
-Focus on research, innovation, and industry readiness
-  
+            📚 Academics<br>
+            Offers Undergraduate Engineering Programs (C.S.E(120), E.E(120), M.E(60), C.E(60))<br>
+            Focus on research, innovation, and industry readiness
         </p>
     </section>
 
@@ -93,12 +127,12 @@ Focus on research, innovation, and industry readiness
     </section>
 
     <footer>
-        <p>&copy; 2026 Jhadeswar Engineering College. All Rights Reserved
-            📍 Contact Information
-Address: Channpur Road, near Birla Tyres, Balasore, Odisha
-Phone: +91-9692611352
-Email: info@jec.edu.in
-Website:-https://www.jec.edu.in/.</p>
+        <p>&copy; 2026 Jhadeswar Engineering College. All Rights Reserved<br>
+        📍 Contact Information<br>
+        Address: Channpur Road, near Birla Tyres, Balasore, Odisha<br>
+        Phone: +91-9692611352<br>
+        Email: info@jec.edu.in<br>
+        Website: https://www.jec.edu.in/</p>
     </footer>
 </body>
 </html>
