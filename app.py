@@ -35,7 +35,7 @@ def home():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        reg = request.form["username"]
+        reg = request.form["username"]   # must match form field name
         password = request.form["password"]
         user = Student.query.get(reg)
         if user and user.password == password:
@@ -148,4 +148,3 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
