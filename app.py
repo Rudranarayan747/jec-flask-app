@@ -3,9 +3,8 @@ import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # needed for sessions
+app.secret_key = "your_secret_key"
 
-# Upload folder setup
 UPLOAD_FOLDER = os.path.join(app.root_path, "static/uploads")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "mp4", "avi", "mov"}
@@ -25,7 +24,6 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        # Simple check (replace with DB lookup if needed)
         if username == "admin" and password == "admin123":
             session["user"] = username
             session["role"] = "admin"
@@ -35,6 +33,21 @@ def login():
             return redirect(url_for("login"))
 
     return render_template("login.html")
+
+# ---------------- Register ----------------
+@app.route("/register")
+def register():
+    return "Register page coming soon"
+
+# ---------------- Student Dashboard ----------------
+@app.route("/student_dashboard")
+def student_dashboard():
+    return "Student Dashboard coming soon"
+
+# ---------------- Add Notice ----------------
+@app.route("/add_notice")
+def add_notice():
+    return "Notice page coming soon"
 
 # ---------------- Logout ----------------
 @app.route("/logout")
