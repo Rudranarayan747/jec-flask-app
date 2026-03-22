@@ -2,9 +2,13 @@
 <html>
 <head>
     <title>Admin Dashboard - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Admin Dashboard</h1>
+    </header>
 
     <h2>Notices</h2>
     <a href="{{ url_for('add_notice') }}">Add New Notice</a>
