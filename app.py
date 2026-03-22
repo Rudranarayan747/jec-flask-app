@@ -31,21 +31,30 @@ def load_user(user_id):
 @app.route("/")
 def home():
     return render_template("index.html")
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/login/student", methods=["GET", "POST"])
+def student_login():
     if request.method == "POST":
-        reg = request.form["username"]   # must match form field name
+        reg = request.form["username"]
         password = request.form["password"]
         user = Student.query.get(reg)
-        if user and user.password == password:
+        if user and user.password == password and user.role == "student":
             login_user(user)
-            if user.role == "admin":
-                return redirect(url_for("admin_dashboard"))
-            else:
-                return redirect(url_for("student_dashboard"))
-        flash("Invalid credentials", "danger")
-    return render_template("login.html")
+            return redirect(url_for("student_dashboard"))
+        flash("Invalid student credentials", "danger")
+    return render_template("student_login.html")
+
+
+@app.route("/login/admin", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        reg = request.form["username"]
+        password = request.form["password"]
+        user = Student.query.get(reg)
+        if user and user.password == password and user.role == "admin":
+            login_user(user)
+            return redirect(url_for("admin_dashboard"))
+        flash("Invalid admin credentials", "danger")
+    return render_template("admin_login.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
