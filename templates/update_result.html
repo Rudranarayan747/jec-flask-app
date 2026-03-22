@@ -6,14 +6,11 @@
 </head>
 <body>
     <h2>Update Result for {{ student.name }} (Reg No: {{ student.id }})</h2>
-
     <form method="POST">
         <label for="result">Result:</label>
-        <input type="text" id="result" name="result" value="{{ student.result }}" required>
-        <br><br>
-        <button type="submit" class="btn btn-success">Save</button>
+        <input type="text" id="result" name="result" value="{{ student.result }}" required><br><br>
+        <button type="submit">Save</button>
     </form>
-
     <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
 </body>
 </html>
