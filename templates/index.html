@@ -14,7 +14,7 @@
             color: white;
             padding: 20px;
             text-align: center;
-            position: relative; /* allows logos in corners */
+            position: relative;
         }
         .logos-left {
             position: absolute;
@@ -22,7 +22,8 @@
             left: 20px;
             display: flex;
             flex-direction: row; /* side by side */
-            gap: 15px;           /* spacing between logos */
+            align-items: center;
+            gap: 15px;
         }
         .logos-left img {
             width: 70px;
@@ -32,7 +33,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px; /* space between logo and text */
+            gap: 20px;
         }
         .jec-logo {
             width: 90px;
@@ -70,7 +71,7 @@
 </head>
 <body>
     <header>
-        <!-- AICTE and BPUT logos side by side on left -->
+        <!-- AICTE and BPUT logos side by side -->
         <div class="logos-left">
             <img src="{{ url_for('static', filename='aicte_logo.png') }}" alt="AICTE Logo">
             <img src="{{ url_for('static', filename='bput_logo.png') }}" alt="BPUT Logo">
@@ -89,6 +90,8 @@
     <nav>
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a>
+        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
         <a href="{{ url_for('add_notice') }}">Notices</a>
         <a href="{{ url_for('events') }}">Events Gallery</a>
     </nav>
