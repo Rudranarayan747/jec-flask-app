@@ -90,6 +90,13 @@ def admin_dashboard():
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
     students = Student.query.filter(Student.role == "student").all()
     return render_template("admin.html", notices=notices, students=students)
+    @app.route("/admin_dashboard")
+@login_required
+def admin_dashboard():
+    if current_user.role != "admin":
+        return "Access denied"
+    return render_template("admin.html")
+
 
 @app.route("/admin/add_notice", methods=["GET", "POST"])
 @login_required
