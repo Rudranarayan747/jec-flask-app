@@ -158,12 +158,12 @@ def upload_media():
     return render_template("upload_media.html")
 
 @app.route("/events")
-@login_required
 def events():
     files = []
     if os.path.exists(app.config["UPLOAD_FOLDER"]):
         files = os.listdir(app.config["UPLOAD_FOLDER"])
     return render_template("events.html", files=files)
+
 
 
 # ---------------- Initialize ----------------
