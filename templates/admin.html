@@ -5,65 +5,35 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('admin_dashboard') }}">
-            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-            <span>Jhadeswar Engineering College</span>
-        </a>
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('add_notice') }}">Add Notice</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Manage Students</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-        </ul>
-    </nav>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Admin Dashboard</h1>
+    </header>
 
-    <div class="page-container">
-        <header>
-            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-            <h1>Jhadeswar Engineering College, Balasore</h1>
-        </header>
+    <h2>Notices</h2>
+    <a href="{{ url_for('add_notice') }}">Add New Notice</a>
+    <ul>
+        {% for n in notices %}
+        <li><strong>{{ n.title }}</strong> - {{ n.date_posted.strftime('%Y-%m-%d') }}<br>{{ n.content }}</li>
+        {% endfor %}
+    </ul>
 
-        <h2>Admin Dashboard</h2>
-        <p>Welcome, Administrator. You can manage notices and students here.</p>
+    <h2>Manage Students</h2>
+    <table border="1">
+        <tr><th>Reg No</th><th>Name</th><th>Result</th><th>Actions</th></tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.id }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.result }}</td>
+            <td>
+                <a href="{{ url_for('update_result', reg=student.id) }}">Update</a>
+                <a href="{{ url_for('delete_student', reg=student.id) }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
-        <!-- Notices Section -->
-        <a class="btn btn-success mb-3" href="{{ url_for('add_notice') }}">Add New Notice</a>
-        <h3>All Notices</h3>
-        <ul class="list-group">
-            {% for n in notices %}
-                <li class="list-group-item">
-                    <h5>{{ n.title }}</h5>
-                    <p>{{ n.content }}</p>
-                    <small class="text-muted">Posted on {{ n.date_posted.strftime('%d %B %Y') }}</small>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <!-- Student Management Section -->
-        <h3 class="mt-4">Manage Students</h3>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Reg No</th>
-                    <th>Name</th>
-                    <th>Result</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.result }}</td>
-                    <td>
-                        <a class="btn btn-primary btn-sm" href="{{ url_for('update_result', reg=student.id) }}">Update</a>
-                        <a class="btn btn-danger btn-sm" href="{{ url_for('delete_student', reg=student.id) }}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 </html>
