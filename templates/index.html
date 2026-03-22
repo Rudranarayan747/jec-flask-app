@@ -14,15 +14,15 @@
             color: white;
             padding: 20px;
             text-align: center;
-            position: relative; /* allows logos to be positioned inside */
+            position: relative; /* allows logos in corners */
         }
         .logos-left {
             position: absolute;
             top: 10px;
             left: 20px;
             display: flex;
-            flex-direction: column; /* stack vertically */
-            gap: 10px;
+            flex-direction: row; /* side by side */
+            gap: 15px;           /* spacing between logos */
         }
         .logos-left img {
             width: 70px;
@@ -70,7 +70,7 @@
 </head>
 <body>
     <header>
-        <!-- AICTE and BPUT logos stacked on left -->
+        <!-- AICTE and BPUT logos side by side on left -->
         <div class="logos-left">
             <img src="{{ url_for('static', filename='aicte_logo.png') }}" alt="AICTE Logo">
             <img src="{{ url_for('static', filename='bput_logo.png') }}" alt="BPUT Logo">
@@ -92,6 +92,7 @@
         <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a>
         <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
         <a href="{{ url_for('add_notice') }}">Notices</a>
+        <a href="{{ url_for('events') }}">Events Gallery</a>
     </nav>
 
     <section>
@@ -122,7 +123,8 @@
         <p>
             <a href="{{ url_for('student_dashboard') }}">Student Dashboard</a> | 
             <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a> | 
-            <a href="{{ url_for('add_notice') }}">View Notices</a>
+            <a href="{{ url_for('add_notice') }}">View Notices</a> | 
+            <a href="{{ url_for('events') }}">Events Gallery</a>
         </p>
     </section>
 
