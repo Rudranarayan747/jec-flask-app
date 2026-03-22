@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Dashboard</title>
+    <title>Student Dashboard - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome, {{ student.name }}</h1>
-    <p>Your Result: {{ student.result }}</p>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Student Dashboard</h1>
+    </header>
 
-    <h2>Notices</h2>
+    <h2>Welcome, {{ student.name }}</h2>
+    <p><strong>Registration No:</strong> {{ student.id }}</p>
+    <p><strong>Your Result:</strong> {{ student.result }}</p>
+
+    <h3>Notices</h3>
     <ul>
         {% for notice in notices %}
         <li><strong>{{ notice.title }}</strong> - {{ notice.date_posted.strftime('%Y-%m-%d') }}<br>{{ notice.content }}</li>
