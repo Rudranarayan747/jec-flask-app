@@ -1,41 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Dashboard - JEC</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Student Dashboard</title>
 </head>
 <body>
-    <nav class="navbar">
-        <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-            <span>Jhadeswar Engineering College</span>
-        </a>
-        <ul class="navbar-nav ms-auto">
-            <li><a class="nav-link" href="/notices">Notice Board</a></li>
-            <li><a class="nav-link" href="/logout">Logout</a></li>
-        </ul>
-    </nav>
+    <h1>Welcome, {{ student.name }}</h1>
+    <p>Your Result: {{ student.result }}</p>
 
-    <div class="page-container">
-        <header>
-            <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-            <h1>Jhadeswar Engineering College, Balasore</h1>
-        </header>
+    <h2>Notices</h2>
+    <ul>
+        {% for notice in notices %}
+        <li>
+            <strong>{{ notice.title }}</strong> - {{ notice.date_posted.strftime('%Y-%m-%d') }}<br>
+            {{ notice.content }}
+        </li>
+        {% endfor %}
+    </ul>
 
-        <h2>Welcome {{ student.name }}</h2>
-        <p><strong>Registration Number:</strong> {{ current_user.id }}</p>
-        <p><strong>Exam Result:</strong> {{ student.result }}</p>
-
-        <h3 class="mt-4">Latest Notice</h3>
-        {% if notices %}
-            <div class="alert alert-info">
-                <strong>{{ notices[0].title }}</strong><br>
-                {{ notices[0].content }}
-                <br><small>Posted on {{ notices[0].date_posted.strftime('%d %B %Y') }}</small>
-            </div>
-        {% else %}
-            <p>No notices available.</p>
-        {% endif %}
-    </div>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 </html>
