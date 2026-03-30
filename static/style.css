@@ -1,26 +1,18 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f9;
-    margin: 0;
-    padding: 0;
-}
-
 header {
     background: #003366;
     color: white;
     padding: 20px;
     text-align: center;
-    display: flex;              /* use flexbox */
-    flex-direction: column;     /* stack content vertically */
+    display: flex;
+    flex-direction: column;   /* stack content vertically */
     align-items: center;
-    position: relative;
 }
 
 .logos-left {
     display: flex;
-    flex-direction: row;
+    flex-direction: row;      /* side by side */
     gap: 15px;
-    margin-bottom: 10px;        /* space below logos */
+    margin-bottom: 10px;      /* space below logos */
 }
 
 .logos-left img {
@@ -33,7 +25,7 @@ header {
     align-items: center;
     justify-content: center;
     gap: 20px;
-    flex-wrap: wrap;            /* allow wrapping on small screens */
+    flex-wrap: wrap;          /* allow wrapping on small screens */
 }
 
 .jec-logo {
@@ -41,48 +33,7 @@ header {
     height: auto;
 }
 
-nav {
-    background: #0055a5;
-    padding: 10px;
-    text-align: center;
-}
-
-nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-h2, h3 {
-    color: #003366;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th, table td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-}
-
-button {
-    background: #0055a5;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #003366;
-}
-
-/* ✅ Responsive adjustments */
+/* Mobile adjustments */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column; /* stack JEC logo and text vertically */
@@ -91,14 +42,5 @@ button:hover {
 
     .jec-logo {
         width: 70px; /* shrink logo on mobile */
-    }
-
-    nav a {
-        display: block; /* stack nav links vertically */
-        margin: 10px 0;
-    }
-
-    button {
-        width: 100%; /* full-width buttons for easier tapping */
     }
 }
