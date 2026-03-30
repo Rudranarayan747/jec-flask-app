@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monthly Attendance - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Monthly Attendance</h1>
+    </header>
+
+    <h2>Welcome, {{ student.name }}</h2>
+    <p><strong>Registration No:</strong> {{ student.id }}</p>
+
+    <form method="POST">
+        <label>Month:
+            <input type="number" name="month" min="1" max="12" required>
+        </label>
+        <label>Year:
+            <input type="number" name="year" min="2025" required>
+        </label>
+        <button type="submit">View Attendance</button>
+    </form>
+
+    {% if month and year %}
+    <h3>Attendance for {{ month }}/{{ year }}</h3>
+    <p><strong>Attendance Percentage:</strong> {{ percent|round(2) }}%</p>
+    <p><strong>Status:</strong> {{ eligible }}</p>
+    {% endif %}
+
+    <h3>Daily Records</h3>
+    <table border="1">
+        <tr><th>Date</th><th>Status</th></tr>
+        {% for record in attendance %}
+        {% if record.date.month == month and record.date.year == year %}
+        <tr>
+            <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ record.status }}</td>
+        </tr>
+        {% endif %}
+        {% else %}
+        <tr><td colspan="2">No attendance records found for this month.</td></tr>
+        {% endfor %}
+    </table>
+
+    <p><a href="{{ url_for('student_dashboard') }}">Back to Student Dashboard</a></p>
+</body>
+</html>
