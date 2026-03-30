@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 import os
-from sqlalchemy import extract   # ✅ Correct way for month/year filtering in SQLite
+from sqlalchemy import extract   # ✅ Correct for month/year filtering in SQLite
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///jec.db"
@@ -229,4 +229,4 @@ with app.app_context():
     db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True
+    app.run(debug=True)   # ✅ Fixed: properly closed parenthesis
