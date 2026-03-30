@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 import os
+from sqlalchemy import extract   # ✅ Correct way for month/year filtering in SQLite
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///jec.db"
@@ -48,12 +49,12 @@ def load_user(user_id):
 def calculate_attendance_percentage(student_id, month=None, year=None, semester=None):
     query = Attendance.query.filter_by(student_id=student_id)
     if month and year:
-        query = query.filter(db.extract("month", Attendance.date) == month,
-                             db.extract("year", Attendance.date) == year)
+        query = query.filter(extract("month", Attendance.date) == month,
+                             extract("year", Attendance.date) == year)
     if semester == "Jan-Jun":
-        query = query.filter(db.extract("month", Attendance.date).between(1, 6))
+        query = query.filter(extract("month", Attendance.date).between(1, 6))
     elif semester == "Jul-Dec":
-        query = query.filter(db.extract("month", Attendance.date).between(7, 12))
+        query = query.filter(extract("month", Attendance.date).between(7, 12))
 
     records = query.all()
     if not records:
@@ -228,4 +229,4 @@ with app.app_context():
     db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True
