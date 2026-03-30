@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 import os
-from sqlalchemy import extract   # ✅ Correct for month/year filtering in SQLite
+from sqlalchemy import extract
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///jec.db"
@@ -17,7 +17,7 @@ login_manager.login_view = "login"
 
 # ---------------- Models ----------------
 class Student(UserMixin, db.Model):
-    id = db.Column(db.String(50), primary_key=True)  # registration number
+    id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.String(100))
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
@@ -33,7 +33,7 @@ class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.String(50), db.ForeignKey("student.id"))
     date = db.Column(db.Date, default=db.func.current_date())
-    status = db.Column(db.String(10))  # Present / Absent
+    status = db.Column(db.String(10))
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -216,17 +216,23 @@ def attendance_dashboard():
         summary.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("attendance_dashboard.html", students=students, summary=summary)
 
+# ---------------- NEW: Add Notice ----------------
+@app.route("/add_notice", methods=["GET", "POST"])
+@login_required
+def add_notice():
+    if current_user.role != "admin":
+        return "Access denied"
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+        new_notice = Notice(title=title, content=content)
+        db.session.add(new_notice)
+        db.session.commit()
+        flash("Notice added successfully!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("add_notice.html")
+
 # ---------------- Initialize ----------------
 with app.app_context():
     db.create_all()
-    if not Student.query.get("admin"):
-        db.session.add(Student(id="admin", name="Administrator", password="admin123", role="admin"))
-    if not Notice.query.first():
-        db.session.add(Notice(
-            title="Upcoming Internal 1 Exam",
-            content="Internal 1 for 2nd Semester will be held from 24th March to 26th March."
-        ))
-    db.session.commit()
-
-if __name__ == "__main__":
-    app.run(debug=True)   # ✅ Fixed: properly closed parenthesis
+    if not Student.query.get("admin
