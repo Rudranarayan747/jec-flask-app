@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Dashboard - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Attendance Dashboard</h1>
+    </header>
+
+    <h2>Daily Attendance</h2>
+    <form method="POST">
+        <table border="1">
+            <tr><th>Reg No</th><th>Name</th><th>Status</th></tr>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.id }}</td>
+                <td>{{ student.name }}</td>
+                <td>
+                    <label><input type="radio" name="status_{{ student.id }}" value="Present" required> Present</label>
+                    <label><input type="radio" name="status_{{ student.id }}" value="Absent"> Absent</label>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit">Submit Attendance</button>
+    </form>
+
+    <h2>Attendance Summary</h2>
+    <table border="1">
+        <tr><th>Reg No</th><th>Name</th><th>Attendance %</th><th>Eligibility</th></tr>
+        {% for s in summary %}
+        <tr>
+            <td>{{ s.student.id }}</td>
+            <td>{{ s.student.name }}</td>
+            <td>{{ s.percent|round(2) }}%</td>
+            <td>{{ s.eligible }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+</body>
+</html>
