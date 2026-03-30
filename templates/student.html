@@ -14,10 +14,31 @@
     <p><strong>Registration No:</strong> {{ student.id }}</p>
     <p><strong>Your Result:</strong> {{ student.result }}</p>
 
+    <h3>Attendance</h3>
+    <p><strong>Overall Attendance:</strong> {{ percent|round(2) }}%</p>
+    <p><strong>Status:</strong> {{ eligible }}</p>
+    <p>
+        <a href="{{ url_for('student_attendance') }}">View Monthly Attendance</a> | 
+        <a href="{{ url_for('semester_attendance') }}">View Semester Attendance</a>
+    </p>
+
     <h3>Notices</h3>
     <ul>
         {% for notice in notices %}
         <li><strong>{{ notice.title }}</strong> - {{ notice.date_posted.strftime('%Y-%m-%d') }}<br>{{ notice.content }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Available PDFs</h3>
+    <ul>
+        {% for file in files %}
+        <li>
+            <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
+                {{ file.filename }}
+            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') }})
+        </li>
+        {% else %}
+        <li>No files uploaded yet.</li>
         {% endfor %}
     </ul>
 
