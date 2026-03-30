@@ -235,4 +235,23 @@ def add_notice():
 # ---------------- Initialize ----------------
 with app.app_context():
     db.create_all()
-    if not Student.query.get("admin
+    # Ensure admin account exists
+    if not Student.query.get("admin"):
+        db.session.add(Student(
+            id="admin",
+            name="Administrator",
+            password="admin123",
+            role="admin"
+        ))
+    # Ensure at least one default notice exists
+    if not Notice.query.first():
+        db.session.add(Notice(
+            title="Upcoming Internal 1 Exam",
+            content="Internal 1 for 2nd Semester will be held from 24th March to 26th March."
+        ))
+    db.session.commit()
+
+# ---------------- Run ----------------
+if __name__ == "__main__":
+    app.run(debug=True)
+
