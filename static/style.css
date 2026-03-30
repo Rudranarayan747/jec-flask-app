@@ -3,44 +3,31 @@ header {
     color: white;
     padding: 20px;
     text-align: center;
-    display: flex;
-    flex-direction: column;   /* stack content vertically */
-    align-items: center;
 }
 
-.logos-left {
+.header-logos {
     display: flex;
-    flex-direction: row;      /* side by side */
-    gap: 15px;
-    margin-bottom: 10px;      /* space below logos */
-}
-
-.logos-left img {
-    width: 70px;
-    height: auto;
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
+    flex-direction: row;   /* side by side on desktop */
     justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;          /* allow wrapping on small screens */
+    align-items: center;
+    gap: 20px;             /* space between logos */
+    flex-wrap: wrap;       /* allow wrapping on small screens */
+    margin-bottom: 15px;
 }
 
-.jec-logo {
-    width: 90px;
+.header-logos img {
+    width: 80px;
     height: auto;
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-    .header-content {
-        flex-direction: column; /* stack JEC logo and text vertically */
-        gap: 10px;
+    .header-logos {
+        flex-direction: column; /* stack vertically on mobile */
+        gap: 15px;              /* keep space between stacked logos */
     }
 
-    .jec-logo {
-        width: 70px; /* shrink logo on mobile */
+    .header-logos img {
+        width: 70px;            /* shrink logos slightly */
     }
 }
