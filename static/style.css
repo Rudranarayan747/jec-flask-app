@@ -10,6 +10,35 @@ header {
     color: white;
     padding: 20px;
     text-align: center;
+    display: flex;              /* use flexbox */
+    flex-direction: column;     /* stack content vertically */
+    align-items: center;
+    position: relative;
+}
+
+.logos-left {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 10px;        /* space below logos */
+}
+
+.logos-left img {
+    width: 70px;
+    height: auto;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;            /* allow wrapping on small screens */
+}
+
+.jec-logo {
+    width: 90px;
+    height: auto;
 }
 
 nav {
@@ -53,39 +82,23 @@ button:hover {
     background: #003366;
 }
 
-/* ✅ Responsive adjustments for mobile */
+/* ✅ Responsive adjustments */
 @media (max-width: 768px) {
-    header {
-        padding: 15px;
-    }
-
-    nav a {
-        display: block;       /* stack links vertically */
-        margin: 10px 0;
-    }
-
-    table, table th, table td {
-        font-size: 14px;      /* smaller text for narrow screens */
-    }
-
-    button {
-        width: 100%;          /* buttons span full width */
-        padding: 12px;
-    }
-
-    /* Logo fixes */
-    .logos-left {
-        position: static;     /* remove absolute positioning */
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-
     .header-content {
         flex-direction: column; /* stack JEC logo and text vertically */
         gap: 10px;
     }
 
     .jec-logo {
-        width: 70px;          /* shrink logo size on mobile */
+        width: 70px; /* shrink logo on mobile */
+    }
+
+    nav a {
+        display: block; /* stack nav links vertically */
+        margin: 10px 0;
+    }
+
+    button {
+        width: 100%; /* full-width buttons for easier tapping */
     }
 }
