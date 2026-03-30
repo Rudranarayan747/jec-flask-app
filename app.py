@@ -173,6 +173,50 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
+    # ---------------- Manage Students ----------------
+@app.route("/admin/update_result/<reg>", methods=["GET", "POST"])
+@login_required
+def update_result(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if not student:
+        return "Student not found"
+    if request.method == "POST":
+        student.result = request.form["result"]
+        db.session.commit()
+        flash("Result updated successfully!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("update_result.html", student=student)
+
+@app.route("/admin/delete_student/<reg>")
+@login_required
+def delete_student(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if student:
+        db.session.delete(student)
+        db.session.commit()
+        flash("Student deleted successfully!", "success")
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/admin/mark_attendance/<reg>", methods=["GET", "POST"])
+@login_required
+def mark_attendance(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if not student:
+        return "Student not found"
+    if request.method == "POST":
+        status = request.form["status"]
+        record = Attendance(student_id=student.id, status=status)
+        db.session.add(record)
+        db.session.commit()
+        flash("Attendance marked successfully!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("mark_attendance.html", student=student)
 
 @app.route("/admin/upload_pdf", methods=["GET", "POST"])
 @login_required
