@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Semester Attendance - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Semester Attendance</h1>
+    </header>
+
+    <h2>Welcome, {{ student.name }}</h2>
+    <p><strong>Registration No:</strong> {{ student.id }}</p>
+
+    <form method="POST">
+        <label>Select Semester:</label>
+        <select name="semester" required>
+            <option value="Jan-Jun">Jan–Jun</option>
+            <option value="Jul-Dec">Jul–Dec</option>
+        </select>
+        <button type="submit">View Attendance</button>
+    </form>
+
+    {% if semester %}
+    <h3>Attendance for {{ semester }}</h3>
+    <p><strong>Attendance Percentage:</strong> {{ percent|round(2) }}%</p>
+    <p><strong>Status:</strong> {{ eligible }}</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('student_dashboard') }}">Back to Student Dashboard</a></p>
+</body>
+</html>
