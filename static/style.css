@@ -52,3 +52,40 @@ button {
 button:hover {
     background: #003366;
 }
+
+/* ✅ Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    header {
+        padding: 15px;
+    }
+
+    nav a {
+        display: block;       /* stack links vertically */
+        margin: 10px 0;
+    }
+
+    table, table th, table td {
+        font-size: 14px;      /* smaller text for narrow screens */
+    }
+
+    button {
+        width: 100%;          /* buttons span full width */
+        padding: 12px;
+    }
+
+    /* Logo fixes */
+    .logos-left {
+        position: static;     /* remove absolute positioning */
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .header-content {
+        flex-direction: column; /* stack JEC logo and text vertically */
+        gap: 10px;
+    }
+
+    .jec-logo {
+        width: 70px;          /* shrink logo size on mobile */
+    }
+}
