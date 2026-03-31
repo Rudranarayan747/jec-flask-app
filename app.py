@@ -144,7 +144,7 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
-# Update student branch + result
+# ---------------- Update & Delete ----------------
 @app.route("/admin/update_student/<reg>", methods=["GET", "POST"])
 @login_required
 def update_student(reg):
@@ -166,9 +166,6 @@ def update_student(reg):
 
     return render_template("update_student.html", student=student)
 
-
-
-# Delete student
 @app.route("/admin/delete_student/<reg>", methods=["GET", "POST"])
 @login_required
 def delete_student(reg):
@@ -185,9 +182,7 @@ def delete_student(reg):
         flash("Student deleted successfully!", "success")
         return redirect(url_for("admin_dashboard"))
 
-    # Render confirmation page before deleting
     return render_template("delete_student.html", student=student)
-
 
 # ---------------- Attendance Dashboard ----------------
 @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
