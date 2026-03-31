@@ -141,6 +141,7 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
+# ---------------- Attendance Dashboard ----------------
 @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
@@ -173,6 +174,7 @@ def attendance_dashboard():
 
     return render_template("attendance_dashboard.html", students=students, summary=summary)
 
+# ---------------- Search Attendance ----------------
 @app.route("/admin/search_attendance", methods=["GET", "POST"])
 @login_required
 def search_attendance():
@@ -193,7 +195,9 @@ def search_attendance():
             flash("Student not found", "danger")
 
     return render_template("search_attendance.html", student=student, percent=percent, eligible=eligible)
-    @app.route("/upload_pdf", methods=["POST"])
+
+# ---------------- Upload PDF ----------------
+@app.route("/upload_pdf", methods=["POST"])
 @login_required
 def upload_pdf():
     if current_user.role != "admin":
@@ -214,7 +218,22 @@ def upload_pdf():
     flash("File uploaded successfully!", "success")
     return redirect(url_for("admin_dashboard"))
 
+# ---------------- Student Monthly/Semester Attendance ----------------
+@app.route("/student/monthly_attendance")
+@login_required
+def student_attendance():
+    if current_user.role != "student":
+        return "Access denied"
+    return render_template("monthly_attendance.html")
 
+@app.route("/student/semester_attendance")
+@login_required
+def semester_attendance():
+    if current_user.role != "student":
+        return "Access denied"
+    return render_template("semester_attendance.html")
+
+# ---------------- Add Notice ----------------
 @app.route("/add_notice", methods=["GET", "POST"])
 @login_required
 def add_notice():
@@ -250,3 +269,4 @@ with app.app_context():
 if __name__ == "__main__":
     app.run(debug=True)
 
+ 
