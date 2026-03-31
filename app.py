@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.utils import secure_filename
 import os
 from sqlalchemy import extract
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///jec.db"
@@ -125,40 +126,6 @@ def student_dashboard():
                            attendance=attendance_records, files=files,
                            percent=percent, eligible=eligible)
 
-@app.route("/student/attendance", methods=["GET", "POST"])
-@login_required
-def student_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-    month = None
-    year = None
-    if request.method == "POST":
-        month = int(request.form["month"])
-        year = int(request.form["year"])
-    student = Student.query.get(current_user.id)
-    percent = calculate_attendance_percentage(student.id, month, year)
-    eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-    records = Attendance.query.filter_by(student_id=student.id).all()
-    return render_template("student_attendance.html", student=student,
-                           attendance=records, percent=percent, eligible=eligible,
-                           month=month, year=year)
-
-@app.route("/student/semester_attendance", methods=["GET", "POST"])
-@login_required
-def semester_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-    semester = None
-    percent = 0
-    eligible = "Not Eligible for Exam"
-    student = Student.query.get(current_user.id)
-    if request.method == "POST":
-        semester = request.form["semester"]
-        percent = calculate_attendance_percentage(student.id, semester=semester)
-        eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-    return render_template("semester_attendance.html", student=student,
-                           semester=semester, percent=percent, eligible=eligible)
-
 @app.route("/admin")
 @login_required
 def admin_dashboard():
@@ -173,94 +140,63 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
-    # ---------------- Manage Students ----------------
-@app.route("/admin/update_result/<reg>", methods=["GET", "POST"])
-@login_required
-def update_result(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if not student:
-        return "Student not found"
-    if request.method == "POST":
-        student.result = request.form["result"]
-        db.session.commit()
-        flash("Result updated successfully!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("update_result.html", student=student)
 
-@app.route("/admin/delete_student/<reg>")
-@login_required
-def delete_student(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if student:
-        db.session.delete(student)
-        db.session.commit()
-        flash("Student deleted successfully!", "success")
-    return redirect(url_for("admin_dashboard"))
-
-@app.route("/admin/mark_attendance/<reg>", methods=["GET", "POST"])
-@login_required
-def mark_attendance(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if not student:
-        return "Student not found"
-    if request.method == "POST":
-        status = request.form["status"]
-        record = Attendance(student_id=student.id, status=status)
-        db.session.add(record)
-        db.session.commit()
-        flash("Attendance marked successfully!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("mark_attendance.html", student=student)
-
-@app.route("/admin/upload_pdf", methods=["GET", "POST"])
-@login_required
-def upload_pdf():
-    if current_user.role != "admin":
-        return "Access denied"
-    if request.method == "POST":
-        file = request.files["pdf"]
-        if file and file.filename.endswith(".pdf"):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            file.save(filepath)
-            new_file = UploadedFile(filename=filename, filepath=filepath)
-            db.session.add(new_file)
-            db.session.commit()
-            flash("PDF uploaded successfully!", "success")
-            return redirect(url_for("admin_dashboard"))
-        else:
-            flash("Only PDF files are allowed.", "danger")
-    return render_template("upload_pdf.html")
-
+# ---------------- Attendance Dashboard (Daily with Date) ----------------
 @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
+
     students = Student.query.filter(Student.role == "student").all()
+
     if request.method == "POST":
+        date_str = request.form.get("date")
+        if date_str:
+            chosen_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        else:
+            chosen_date = datetime.today().date()
+
         for student in students:
             status = request.form.get(f"status_{student.id}")
             if status:
-                record = Attendance(student_id=student.id, status=status)
+                record = Attendance(student_id=student.id, status=status, date=chosen_date)
                 db.session.add(record)
         db.session.commit()
-        flash("Attendance submitted for all students!", "success")
+        flash(f"Attendance submitted for {chosen_date.strftime('%d-%m-%Y')}!", "success")
         return redirect(url_for("attendance_dashboard"))
+
     summary = []
     for s in students:
         percent = calculate_attendance_percentage(s.id)
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         summary.append({"student": s, "percent": percent, "eligible": eligible})
+
     return render_template("attendance_dashboard.html", students=students, summary=summary)
 
-# ---------------- NEW: Add Notice ----------------
+# ---------------- Search Attendance by Registration ----------------
+@app.route("/admin/search_attendance", methods=["GET", "POST"])
+@login_required
+def search_attendance():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    student = None
+    percent = None
+    eligible = None
+
+    if request.method == "POST":
+        reg = request.form["reg"]
+        student = Student.query.get(reg)
+        if student:
+            percent = calculate_attendance_percentage(student.id)
+            eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
+        else:
+            flash("Student not found", "danger")
+
+    return render_template("search_attendance.html", student=student, percent=percent, eligible=eligible)
+
+# ---------------- Add Notice ----------------
 @app.route("/add_notice", methods=["GET", "POST"])
 @login_required
 def add_notice():
@@ -279,7 +215,6 @@ def add_notice():
 # ---------------- Initialize ----------------
 with app.app_context():
     db.create_all()
-    # Ensure admin account exists
     if not Student.query.get("admin"):
         db.session.add(Student(
             id="admin",
@@ -287,7 +222,6 @@ with app.app_context():
             password="admin123",
             role="admin"
         ))
-    # Ensure at least one default notice exists
     if not Notice.query.first():
         db.session.add(Notice(
             title="Upcoming Internal 1 Exam",
@@ -298,4 +232,3 @@ with app.app_context():
 # ---------------- Run ----------------
 if __name__ == "__main__":
     app.run(debug=True)
-
