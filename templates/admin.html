@@ -10,17 +10,29 @@
         <h1>Admin Dashboard</h1>
     </header>
 
+    <h2>Welcome, {{ current_user.name }}</h2>
+
+    <!-- Notices Section -->
     <h2>Notices</h2>
     <a href="{{ url_for('add_notice') }}">Add New Notice</a>
     <ul>
         {% for n in notices %}
         <li><strong>{{ n.title }}</strong> - {{ n.date_posted.strftime('%Y-%m-%d') }}<br>{{ n.content }}</li>
+        {% else %}
+        <li>No notices yet.</li>
         {% endfor %}
     </ul>
 
+    <!-- Student Management -->
     <h2>Manage Students</h2>
     <table border="1">
-        <tr><th>Reg No</th><th>Name</th><th>Result</th><th>Attendance %</th><th>Eligibility</th><th>Actions</th></tr>
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Result</th>
+            <th>Attendance %</th>
+            <th>Eligibility</th>
+        </tr>
         {% for s in students %}
         <tr>
             <td>{{ s.student.id }}</td>
@@ -28,21 +40,22 @@
             <td>{{ s.student.result }}</td>
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
-            <td>
-                <a href="{{ url_for('update_result', reg=s.student.id) }}">Update</a>
-                <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
-                <a href="{{ url_for('mark_attendance', reg=s.student.id) }}">Mark Attendance</a>
-            </td>
         </tr>
         {% endfor %}
     </table>
 
+    <!-- Search Attendance -->
+    <h2>Search Attendance</h2>
+    <p><a href="{{ url_for('search_attendance') }}">Search by Registration Number</a></p>
+
+    <!-- Upload PDF -->
     <h2>Upload PDF</h2>
     <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data">
         <input type="file" name="pdf" accept="application/pdf" required>
         <button type="submit">Upload PDF</button>
     </form>
 
+    <!-- Uploaded Files -->
     <h2>Uploaded Files</h2>
     <ul>
         {% for file in files %}
@@ -56,6 +69,7 @@
         {% endfor %}
     </ul>
 
+    <!-- Attendance Management -->
     <h2>Attendance Management</h2>
     <p><a href="{{ url_for('attendance_dashboard') }}">Go to Attendance Dashboard</a></p>
 
