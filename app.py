@@ -20,6 +20,7 @@ login_manager.login_view = "login"
 class Student(UserMixin, db.Model):
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.String(100))
+    branch = db.Column(db.String(100))   # ✅ must exist
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
     result = db.Column(db.String(50))
