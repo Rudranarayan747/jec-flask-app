@@ -25,7 +25,13 @@
     <h3>Notices</h3>
     <ul>
         {% for notice in notices %}
-        <li><strong>{{ notice.title }}</strong> - {{ notice.date_posted.strftime('%Y-%m-%d') }}<br>{{ notice.content }}</li>
+        <li>
+            <strong>{{ notice.title }}</strong> - 
+            {{ notice.date_posted.strftime('%Y-%m-%d') if notice.date_posted else '' }}<br>
+            {{ notice.content }}
+        </li>
+        {% else %}
+        <li>No notices yet.</li>
         {% endfor %}
     </ul>
 
@@ -35,7 +41,7 @@
         <li>
             <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
                 {{ file.filename }}
-            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') }})
+            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
         </li>
         {% else %}
         <li>No files uploaded yet.</li>
