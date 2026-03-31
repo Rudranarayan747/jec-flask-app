@@ -27,38 +27,41 @@
         {% endfor %}
     </ul>
 
-   <!-- Student Management -->
-<h2>Manage Students</h2>
-<table border="1">
-    <tr>
-        <th>Reg No</th>
-        <th>Name</th>
-        <th>Branch</th>
-        <th>Result</th>
-        <th>Attendance %</th>
-        <th>Eligibility</th>
-        <th>Actions</th> <!-- ✅ New column -->
-    </tr>
-    {% for s in students %}
-    <tr>
-        <td>{{ s.student.id }}</td>
-        <td>{{ s.student.name }}</td>
-        <td>{{ s.student.branch }}</td>
-        <td>{{ s.student.result }}</td>
-        <td>{{ s.percent|round(2) }}%</td>
-        <td>{{ s.eligible }}</td>
-        <td>
-          <td>
-    <a href="{{ url_for('update_student', reg=s.student.id) }}">Update</a> 
-    <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
-</td>
-
-        </td>
-    </tr>
-    {% else %}
-    <tr><td colspan="7">No students found.</td></tr>
-    {% endfor %}
-</table>
+    <!-- Student Management -->
+    <h2>Manage Students</h2>
+    <table border="1">
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Branch</th>
+            <th>Result</th>
+            <th>Attendance %</th>
+            <th>Eligibility</th>
+            <th>Actions</th>
+        </tr>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.student.id }}</td>
+            <td>{{ s.student.name }}</td>
+            <td>{{ s.student.branch }}</td>
+            <td>{{ s.student.result }}</td>
+            <td>{{ s.percent|round(2) }}%</td>
+            <td>{{ s.eligible }}</td>
+            <td>
+                <!-- Inline update form -->
+                <form action="{{ url_for('update_student', reg=s.student.id) }}" method="POST" style="display:inline;">
+                    <input type="text" name="branch" value="{{ s.student.branch }}" required>
+                    <input type="text" name="result" value="{{ s.student.result }}" required>
+                    <button type="submit">Update</button>
+                </form>
+                <!-- Delete link -->
+                <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No students found.</td></tr>
+        {% endfor %}
+    </table>
 
     <!-- Search Attendance -->
     <h2>Search Attendance</h2>
