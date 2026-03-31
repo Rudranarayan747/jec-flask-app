@@ -61,7 +61,7 @@ def calculate_attendance_percentage(student_id, month=None, year=None, semester=
     if not records:
         return 0
     total = len(records)
-    present = sum(1 for r in records if r.status.lower() == "present")
+    present = sum(1 for r in records if r.status and r.status.lower() == "present")
     return (present / total) * 100
 
 # ---------------- Routes ----------------
@@ -141,7 +141,6 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
-# ---------------- Attendance Dashboard (Daily with Date) ----------------
 @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
@@ -174,7 +173,6 @@ def attendance_dashboard():
 
     return render_template("attendance_dashboard.html", students=students, summary=summary)
 
-# ---------------- Search Attendance by Registration ----------------
 @app.route("/admin/search_attendance", methods=["GET", "POST"])
 @login_required
 def search_attendance():
@@ -196,7 +194,6 @@ def search_attendance():
 
     return render_template("search_attendance.html", student=student, percent=percent, eligible=eligible)
 
-# ---------------- Add Notice ----------------
 @app.route("/add_notice", methods=["GET", "POST"])
 @login_required
 def add_notice():
@@ -211,8 +208,7 @@ def add_notice():
         flash("Notice added successfully!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("add_notice.html")
-
-# ---------------- Initialize ----------------
+    # ---------------- Initialize ----------------
 with app.app_context():
     db.create_all()
     if not Student.query.get("admin"):
@@ -232,3 +228,4 @@ with app.app_context():
 # ---------------- Run ----------------
 if __name__ == "__main__":
     app.run(debug=True)
+
