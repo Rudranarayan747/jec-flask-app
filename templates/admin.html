@@ -17,7 +17,11 @@
     <a href="{{ url_for('add_notice') }}">Add New Notice</a>
     <ul>
         {% for n in notices %}
-        <li><strong>{{ n.title }}</strong> - {{ n.date_posted.strftime('%Y-%m-%d') }}<br>{{ n.content }}</li>
+        <li>
+            <strong>{{ n.title }}</strong> - 
+            {{ n.date_posted.strftime('%Y-%m-%d') if n.date_posted else '' }}<br>
+            {{ n.content }}
+        </li>
         {% else %}
         <li>No notices yet.</li>
         {% endfor %}
@@ -41,6 +45,8 @@
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
         </tr>
+        {% else %}
+        <tr><td colspan="5">No students found.</td></tr>
         {% endfor %}
     </table>
 
@@ -62,7 +68,7 @@
         <li>
             <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
                 {{ file.filename }}
-            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') }})
+            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
         </li>
         {% else %}
         <li>No files uploaded yet.</li>
