@@ -18,12 +18,14 @@
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
+                <th>Branch</th> <!-- ✅ New column -->
                 <th>Status</th>
             </tr>
             {% for student in students %}
             <tr>
                 <td>{{ student.id }}</td>
                 <td>{{ student.name }}</td>
+                <td>{{ student.branch }}</td> <!-- ✅ Show branch -->
                 <td>
                     <select name="status_{{ student.id }}">
                         <option value="Present">Present</option>
@@ -32,7 +34,7 @@
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="3">No students found.</td></tr>
+            <tr><td colspan="4">No students found.</td></tr>
             {% endfor %}
         </table>
 
@@ -45,6 +47,7 @@
         <tr>
             <th>Reg No</th>
             <th>Name</th>
+            <th>Branch</th> <!-- ✅ New column -->
             <th>Attendance %</th>
             <th>Eligibility</th>
         </tr>
@@ -52,11 +55,12 @@
         <tr>
             <td>{{ s.student.id }}</td>
             <td>{{ s.student.name }}</td>
+            <td>{{ s.student.branch }}</td> <!-- ✅ Show branch -->
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="4">No attendance records yet.</td></tr>
+        <tr><td colspan="5">No attendance records yet.</td></tr>
         {% endfor %}
     </table>
 
