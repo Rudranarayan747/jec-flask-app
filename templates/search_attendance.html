@@ -11,16 +11,46 @@
 
     <!-- Search Form -->
     <form method="POST">
-        <label>Enter Registration Number:</label>
-        <input type="text" name="reg" placeholder="e.g. 22CS101" required>
+        <label for="month">Select Month:</label>
+        <input type="month" id="month" name="month" required><br><br>
+
+        <label for="branch">Enter Branch:</label>
+        <input type="text" id="branch" name="branch" placeholder="e.g. CSE" required><br><br>
+
         <button type="submit">Search</button>
     </form>
 
     <!-- Results -->
-    {% if student %}
-        <h2>Result for {{ student.name }} ({{ student.id }})</h2>
-        <p><strong>Attendance Percentage:</strong> {{ percent|round(2) }}%</p>
-        <p><strong>Status:</strong> {{ eligible }}</p>
+    {% if records %}
+        <h2>Attendance for {{ branch }} in {{ month }}</h2>
+        <table border="1">
+            <tr>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+            {% for r in records %}
+            <tr>
+                <td>{{ r.student.id }}</td>
+                <td>{{ r.student.name }}</td>
+                <td>{{ r.student.branch }}</td>
+                <td>{{ r.date }}</td>
+                <td>{{ r.status }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No records found.</td></tr>
+            {% endfor %}
+        </table>
+
+        <!-- ✅ Export Buttons -->
+        <form action="{{ url_for('export_monthly_pdf', month=month, branch=branch) }}" method="GET">
+            <button type="submit">Download Monthly PDF</button>
+        </form>
+        <form action="{{ url_for('export_monthly_excel', month=month, branch=branch) }}" method="GET">
+            <button type="submit">Download Monthly Excel</button>
+        </form>
     {% endif %}
 
     <!-- Back Link -->
