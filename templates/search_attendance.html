@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Attendance - JEC</title>
+</head>
+<body>
+    <h1>Search Student Attendance</h1>
+
+    <form method="POST">
+        <label>Enter Registration Number:</label>
+        <input type="text" name="reg" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if student %}
+        <h2>Result for {{ student.name }} ({{ student.id }})</h2>
+        <p>Attendance Percentage: {{ percent|round(2) }}%</p>
+        <p>Status: {{ eligible }}</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+</body>
+</html>
