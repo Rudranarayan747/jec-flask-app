@@ -144,6 +144,13 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
+    @app.route("/reset_db")
+def reset_db():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+    return "Database reset successfully!"
+
 # ---------------- Update & Delete ----------------
 @app.route("/admin/update_student/<reg>", methods=["GET", "POST"])
 @login_required
