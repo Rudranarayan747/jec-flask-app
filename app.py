@@ -89,13 +89,17 @@ def register():
     if request.method == "POST":
         reg = request.form["reg"]
         name = request.form["name"]
+        branch = request.form["branch"]   # ✅ capture branch
         password = request.form["password"]
 
         if Student.query.get(reg):
             flash("Registration number already exists", "danger")
             return render_template("register.html")
 
-        new_student = Student(id=reg, name=name, password=password, role="student", result="Not Available")
+        new_student = Student(
+            id=reg, name=name, branch=branch, password=password,
+            role="student", result="Not Available"
+        )
         db.session.add(new_student)
         db.session.commit()
         flash("Registration successful! Please login.", "success")
