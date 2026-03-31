@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exam Result - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+        <h1>Exam Result</h1>
+    </header>
+
+    <h2>Welcome, {{ student.name }}</h2>
+    <p><strong>Registration No:</strong> {{ student.id }}</p>
+    <p><strong>Branch:</strong> {{ student.branch }}</p>
+    <p><strong>Result:</strong> {{ student.result }}</p>
+
+    <h3>Attendance</h3>
+    <p><strong>Attendance Percentage:</strong> {{ percent|round(2) }}%</p>
+    <p><strong>Status:</strong> {{ eligible }}</p>
+
+    <h3>Notices</h3>
+    <ul>
+        {% for n in notices %}
+        <li>
+            <strong>{{ n.title }}</strong> - {{ n.date_posted.strftime('%Y-%m-%d') if n.date_posted else '' }}<br>
+            {{ n.content }}
+        </li>
+        {% else %}
+        <li>No notices available.</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Uploaded Files</h3>
+    <ul>
+        {% for file in files %}
+        <li>
+            <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
+                {{ file.filename }}
+            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
+        </li>
+        {% else %}
+        <li>No files uploaded yet.</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>
