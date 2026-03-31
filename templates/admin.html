@@ -48,8 +48,11 @@
         <td>{{ s.percent|round(2) }}%</td>
         <td>{{ s.eligible }}</td>
         <td>
-            <a href="{{ url_for('update_result', reg=s.student.id) }}">Update</a> |
-            <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
+          <td>
+    <a href="{{ url_for('update_student', reg=s.student.id) }}">Update</a> |
+    <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
+</td>
+
         </td>
     </tr>
     {% else %}
