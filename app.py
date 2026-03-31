@@ -193,6 +193,27 @@ def search_attendance():
             flash("Student not found", "danger")
 
     return render_template("search_attendance.html", student=student, percent=percent, eligible=eligible)
+    @app.route("/upload_pdf", methods=["POST"])
+@login_required
+def upload_pdf():
+    if current_user.role != "admin":
+        return "Access denied"
+    if "pdf" not in request.files:
+        flash("No file selected", "danger")
+        return redirect(url_for("admin_dashboard"))
+    file = request.files["pdf"]
+    if file.filename == "":
+        flash("No file selected", "danger")
+        return redirect(url_for("admin_dashboard"))
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
+    new_file = UploadedFile(filename=filename, filepath=filepath)
+    db.session.add(new_file)
+    db.session.commit()
+    flash("File uploaded successfully!", "success")
+    return redirect(url_for("admin_dashboard"))
+
 
 @app.route("/add_notice", methods=["GET", "POST"])
 @login_required
