@@ -144,6 +144,42 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
+    # Update student result
+@app.route("/admin/update_result/<reg>", methods=["GET", "POST"])
+@login_required
+def update_result(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if not student:
+        flash("Student not found", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
+        new_result = request.form["result"]
+        student.result = new_result
+        db.session.commit()
+        flash("Result updated successfully!", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("update_result.html", student=student)
+
+
+# Delete student
+@app.route("/admin/delete_student/<reg>")
+@login_required
+def delete_student(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if not student:
+        flash("Student not found", "danger")
+    else:
+        db.session.delete(student)
+        db.session.commit()
+        flash("Student deleted successfully!", "success")
+    return redirect(url_for("admin_dashboard"))
+
 
 # ---------------- Attendance Dashboard ----------------
 @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
