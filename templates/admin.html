@@ -33,6 +33,7 @@
         <tr>
             <th>Reg No</th>
             <th>Name</th>
+            <th>Branch</th> <!-- ✅ New column -->
             <th>Result</th>
             <th>Attendance %</th>
             <th>Eligibility</th>
@@ -41,12 +42,13 @@
         <tr>
             <td>{{ s.student.id }}</td>
             <td>{{ s.student.name }}</td>
+            <td>{{ s.student.branch }}</td> <!-- ✅ Show branch -->
             <td>{{ s.student.result }}</td>
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="5">No students found.</td></tr>
+        <tr><td colspan="6">No students found.</td></tr>
         {% endfor %}
     </table>
 
