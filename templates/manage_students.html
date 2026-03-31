@@ -11,6 +11,7 @@
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
+                <th>Branch</th>   <!-- ✅ New column -->
                 <th>Result</th>
                 <th>Actions</th>
             </tr>
@@ -20,6 +21,7 @@
             <tr>
                 <td>{{ student.id }}</td>
                 <td>{{ student.name }}</td>
+                <td>{{ student.branch }}</td>   <!-- ✅ Show branch -->
                 <td>{{ student.result }}</td>
                 <td>
                     <a class="btn btn-primary btn-sm" href="{{ url_for('update_result', reg=student.id) }}">Update</a>
