@@ -2,13 +2,18 @@
 <html>
 <head>
     <title>Attendance Dashboard - JEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Attendance Dashboard</h1>
+    <header>
+        <h1>Attendance Dashboard</h1>
+    </header>
 
+    <!-- Attendance Form -->
     <form method="POST">
-        <label>Select Date:</label>
-        <input type="date" name="date" required>
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required>
+
         <table border="1">
             <tr>
                 <th>Reg No</th>
@@ -26,14 +31,23 @@
                     </select>
                 </td>
             </tr>
+            {% else %}
+            <tr><td colspan="3">No students found.</td></tr>
             {% endfor %}
         </table>
+
         <button type="submit">Submit Attendance</button>
     </form>
 
-    <h2>Attendance Summary (Overall)</h2>
+    <!-- Attendance Summary -->
+    <h2>Overall Attendance Summary</h2>
     <table border="1">
-        <tr><th>Reg No</th><th>Name</th><th>Attendance %</th><th>Eligibility</th></tr>
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Attendance %</th>
+            <th>Eligibility</th>
+        </tr>
         {% for s in summary %}
         <tr>
             <td>{{ s.student.id }}</td>
@@ -41,6 +55,8 @@
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
         </tr>
+        {% else %}
+        <tr><td colspan="4">No attendance records yet.</td></tr>
         {% endfor %}
     </table>
 
