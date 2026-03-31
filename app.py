@@ -185,20 +185,111 @@ def search_attendance():
     if current_user.role != "admin":
         return "Access denied"
 
-    student = None
-    percent = None
-    eligible = None
+    records = None
+    branch = None
+    month = None
 
     if request.method == "POST":
-        reg = request.form["reg"]
-        student = Student.query.get(reg)
-        if student:
-            percent = calculate_attendance_percentage(student.id)
-            eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-        else:
-            flash("Student not found", "danger")
+        month_str = request.form["month"]  # format: YYYY-MM
+        branch = request.form["branch"]
+        year, month_num = map(int, month_str.split("-"))
 
-    return render_template("search_attendance.html", student=student, percent=percent, eligible=eligible)
+        # Get all attendance records for that month
+        records = Attendance.query.filter(
+            extract("month", Attendance.date) == month_num,
+            extract("year", Attendance.date) == year
+        ).all()
+
+        # Filter by branch
+        records = [r for r in records if r.student.branch.lower() == branch.lower()]
+
+        month = month_str
+
+    return render_template("search_attendance.html", records=records, branch=branch, month=month)
+
+
+# Export Monthly Attendance as PDF
+@app.route("/admin/export_monthly_pdf")
+@login_required
+def export_monthly_pdf():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    month_str = request.args.get("month")
+    branch = request.args.get("branch")
+    year, month_num = map(int, month_str.split("-"))
+
+    records = Attendance.query.filter(
+        extract("month", Attendance.date) == month_num,
+        extract("year", Attendance.date) == year
+    ).all()
+    records = [r for r in records if r.student.branch.lower() == branch.lower()]
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, f"Monthly Attendance Report - {branch} ({month_str})", ln=True, align="C")
+
+    pdf.cell(30, 10, "Reg No", 1)
+    pdf.cell(50, 10, "Name", 1)
+    pdf.cell(30, 10, "Branch", 1)
+    pdf.cell(30, 10, "Date", 1)
+    pdf.cell(30, 10, "Status", 1)
+    pdf.ln()
+
+    for r in records:
+        pdf.cell(30, 10, r.student.id, 1)
+        pdf.cell(50, 10, r.student.name, 1)
+        pdf.cell(30, 10, r.student.branch, 1)
+        pdf.cell(30, 10, r.date.strftime("%Y-%m-%d"), 1)
+        pdf.cell(30, 10, r.status, 1)
+        pdf.ln()
+
+    response = make_response(pdf.output(dest="S").encode("latin1"))
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename=attendance_{branch}_{month_str}.pdf"
+    return response
+
+
+# Export Monthly Attendance as Excel
+@app.route("/admin/export_monthly_excel")
+@login_required
+def export_monthly_excel():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    month_str = request.args.get("month")
+    branch = request.args.get("branch")
+    year, month_num = map(int, month_str.split("-"))
+
+    records = Attendance.query.filter(
+        extract("month", Attendance.date) == month_num,
+        extract("year", Attendance.date) == year
+    ).all()
+    records = [r for r in records if r.student.branch.lower() == branch.lower()]
+
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    worksheet = workbook.add_worksheet()
+
+    headers = ["Reg No", "Name", "Branch", "Date", "Status"]
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+
+    for row, r in enumerate(records, start=1):
+        worksheet.write(row, 0, r.student.id)
+        worksheet.write(row, 1, r.student.name)
+        worksheet.write(row, 2, r.student.branch)
+        worksheet.write(row, 3, r.date.strftime("%Y-%m-%d"))
+        worksheet.write(row, 4, r.status)
+
+    workbook.close()
+    output.seek(0)
+
+    response = make_response(output.read())
+    response.headers["Content-Disposition"] = f"attachment; filename=attendance_{branch}_{month_str}.xlsx"
+    response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return response
 
 # ---------------- Upload PDF ----------------
 @app.route("/upload_pdf", methods=["POST"])
