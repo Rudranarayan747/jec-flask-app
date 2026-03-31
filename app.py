@@ -144,10 +144,10 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
-    # Update student result
-@app.route("/admin/update_result/<reg>", methods=["GET", "POST"])
+# Update student branch + result
+@app.route("/admin/update_student/<reg>", methods=["GET", "POST"])
 @login_required
-def update_result(reg):
+def update_student(reg):
     if current_user.role != "admin":
         return "Access denied"
     student = Student.query.get(reg)
@@ -156,17 +156,20 @@ def update_result(reg):
         return redirect(url_for("admin_dashboard"))
 
     if request.method == "POST":
+        new_branch = request.form["branch"]
         new_result = request.form["result"]
+        student.branch = new_branch
         student.result = new_result
         db.session.commit()
-        flash("Result updated successfully!", "success")
+        flash("Student updated successfully!", "success")
         return redirect(url_for("admin_dashboard"))
 
-    return render_template("update_result.html", student=student)
+    return render_template("update_student.html", student=student)
+
 
 
 # Delete student
-@app.route("/admin/delete_student/<reg>")
+@app.route("/admin/delete_student/<reg>", methods=["GET", "POST"])
 @login_required
 def delete_student(reg):
     if current_user.role != "admin":
@@ -174,11 +177,16 @@ def delete_student(reg):
     student = Student.query.get(reg)
     if not student:
         flash("Student not found", "danger")
-    else:
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
         db.session.delete(student)
         db.session.commit()
         flash("Student deleted successfully!", "success")
-    return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("admin_dashboard"))
+
+    # Render confirmation page before deleting
+    return render_template("delete_student.html", student=student)
 
 
 # ---------------- Attendance Dashboard ----------------
