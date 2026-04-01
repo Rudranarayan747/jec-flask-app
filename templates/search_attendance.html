@@ -11,8 +11,14 @@
 
     <!-- Search Form -->
     <form method="POST">
+        <label for="day">Select Day:</label>
+        <input type="number" id="day" name="day" min="1" max="31" required><br><br>
+
         <label for="month">Select Month:</label>
-        <input type="month" id="month" name="month" required><br><br>
+        <input type="number" id="month" name="month" min="1" max="12" required><br><br>
+
+        <label for="year">Enter Year:</label>
+        <input type="number" id="year" name="year" min="2020" required><br><br>
 
         <label for="branch">Enter Branch:</label>
         <input type="text" id="branch" name="branch" placeholder="e.g. CSE" required><br><br>
@@ -22,13 +28,14 @@
 
     <!-- Results -->
     {% if records %}
-        <h2>Attendance for {{ branch }} in {{ month }}</h2>
+        <h2>Attendance for {{ branch }} on {{ day }}/{{ month }}/{{ year }}</h2>
         <table border="1">
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
                 <th>Branch</th>
                 <th>Date</th>
+                <th>Day</th>
                 <th>Month</th>
                 <th>Year</th>
                 <th>Status</th>
@@ -40,6 +47,8 @@
                 <td>{{ r.student.branch }}</td>
                 <!-- Full date -->
                 <td>{{ r.date.strftime("%d-%m-%Y") if r.date else '' }}</td>
+                <!-- Day of week -->
+                <td>{{ r.date.strftime("%A") if r.date else '' }}</td>
                 <!-- Month only -->
                 <td>{{ r.date.strftime("%B") if r.date else '' }}</td>
                 <!-- Year only -->
@@ -47,7 +56,7 @@
                 <td>{{ r.status }}</td>
             </tr>
             {% else %}
-            <tr><td colspan="7">No records found.</td></tr>
+            <tr><td colspan="8">No records found.</td></tr>
             {% endfor %}
         </table>
 
