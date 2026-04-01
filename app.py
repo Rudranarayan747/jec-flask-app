@@ -24,7 +24,9 @@ class Student(UserMixin, db.Model):
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
     result = db.Column(db.String(50))
+    subject = db.Column(db.String(100))
     attendance_records = db.relationship("Attendance", backref="student", lazy=True)
+    
 
 class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -280,25 +282,47 @@ def attendance_dashboard():
 
     if request.method == "POST":
         date_str = request.form.get("date")
-        if date_str:
-            chosen_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        else:
-            chosen_date = datetime.today().date()
+        chosen_date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
         for student in students:
             status = request.form.get(f"status_{student.id}")
             if status:
-                record = Attendance(student_id=student.id, status=status, date=chosen_date)
-                db.session.add(record)
+                # ✅ Assign subjects based on branch
+                if student.branch.lower() == "cse":
+                    subjects = ["Math", "ETW", "BME", "Chem", "BEE", "EM"]
+                elif student.branch.lower() in ["mechanical", "civil", "electrical"]:
+                    subjects = ["PCDS", "Math", "UHV", "BEE", "Phy", "BCE"]
+                else:
+                    subjects = ["General"]
+
+                # Create attendance records for each subject
+                for subj in subjects:
+                    record = Attendance(
+                        student_id=student.id,
+                        status=status,
+                        date=chosen_date,
+                        subject=subj
+                    )
+                    db.session.add(record)
+
         db.session.commit()
         flash(f"Attendance submitted for {chosen_date.strftime('%d-%m-%Y')}!", "success")
         return redirect(url_for("attendance_dashboard"))
 
+    # Summary: subject‑wise percentages
     summary = []
     for s in students:
-        percent = calculate_attendance_percentage(s.id)
-        eligible = "Eligible" if percent >= 60 else "Not Eligible"
-        summary.append({"student": s, "percent": percent, "eligible": eligible})
+        if s.branch.lower() == "cse":
+            subjects = ["Math", "ETW", "BME", "Chem", "BEE", "EM"]
+        elif s.branch.lower() in ["mechanical", "civil", "electrical"]:
+            subjects = ["PCDS", "Math", "UHV", "BEE", "Phy", "BCE"]
+        else:
+            subjects = ["General"]
+
+        for subj in subjects:
+            percent = calculate_attendance_percentage(s.id)  # you can extend this to filter by subject
+            eligible = "Eligible" if percent >= 60 else "Not Eligible"
+            summary.append({"student": s, "subject": subj, "percent": percent, "eligible": eligible})
 
     return render_template("attendance_dashboard.html", students=students, summary=summary)
 
