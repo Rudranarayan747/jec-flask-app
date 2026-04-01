@@ -12,15 +12,16 @@
 
     <h2>Welcome, {{ student.name }}</h2>
     <p><strong>Registration No:</strong> {{ student.id }}</p>
-    <p><strong>Branch:</strong> {{ student.branch }}</p> <!-- ✅ New field -->
+    <p><strong>Branch:</strong> {{ student.branch }}</p>
     <p><strong>Your Result:</strong> {{ student.result }}</p>
 
     <h3>Attendance</h3>
     <p><strong>Overall Attendance:</strong> {{ percent|round(2) }}%</p>
     <p><strong>Status:</strong> {{ eligible }}</p>
     <p>
-        <a href="{{ url_for('student_attendance') }}">View Monthly Attendance</a> | 
-        <a href="{{ url_for('semester_attendance') }}">View Semester Attendance</a>
+        <!-- ✅ Updated route names -->
+        <a href="{{ url_for('student_monthly_attendance') }}">View Monthly Attendance</a> | 
+        <a href="{{ url_for('student_semester_attendance') }}">View Semester Attendance</a>
     </p>
 
     <h3>Notices</h3>
