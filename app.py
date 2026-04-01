@@ -131,6 +131,76 @@ def student_dashboard():
     return render_template("student.html", student=student, notices=notices,
                            attendance=attendance_records, files=files,
                            percent=percent, eligible=eligible)
+    # ---------------- Student Monthly Attendance ----------------
+@app.route("/student/monthly_attendance", methods=["GET", "POST"])
+@login_required
+def student_attendance():
+    if current_user.role != "student":
+        return "Access denied"
+
+    student = Student.query.get(current_user.id)
+    attendance_records = Attendance.query.filter_by(student_id=student.id).all()
+
+    month = None
+    year = None
+    percent = None
+    eligible = None
+
+    if request.method == "POST":
+        month = int(request.form["month"])
+        year = int(request.form["year"])
+
+        filtered_records = [
+            r for r in attendance_records
+            if r.date.month == month and r.date.year == year
+        ]
+
+        percent = calculate_attendance_percentage(student.id, month=month, year=year)
+        eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
+
+        return render_template(
+            "monthly_attendance.html",
+            student=student,
+            attendance=filtered_records,
+            month=month,
+            year=year,
+            percent=percent,
+            eligible=eligible
+        )
+
+    return render_template("monthly_attendance.html", student=student, attendance=attendance_records)
+
+
+# ---------------- Student Semester Attendance ----------------
+@app.route("/student/semester_attendance", methods=["GET", "POST"])
+@login_required
+def semester_attendance():
+    if current_user.role != "student":
+        return "Access denied"
+
+    student = Student.query.get(current_user.id)
+    attendance_records = Attendance.query.filter_by(student_id=student.id).all()
+
+    semester = None
+    percent = None
+    eligible = None
+
+    if request.method == "POST":
+        semester = request.form["semester"]  # "Jan-Jun" or "Jul-Dec"
+        percent = calculate_attendance_percentage(student.id, semester=semester)
+        eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
+
+        return render_template(
+            "semester_attendance.html",
+            student=student,
+            attendance=attendance_records,
+            semester=semester,
+            percent=percent,
+            eligible=eligible
+        )
+
+    return render_template("semester_attendance.html", student=student, attendance=attendance_records)
+
 
 @app.route("/admin")
 @login_required
