@@ -29,6 +29,8 @@
                 <th>Name</th>
                 <th>Branch</th>
                 <th>Date</th>
+                <th>Month</th>
+                <th>Year</th>
                 <th>Status</th>
             </tr>
             {% for r in records %}
@@ -36,11 +38,16 @@
                 <td>{{ r.student.id }}</td>
                 <td>{{ r.student.name }}</td>
                 <td>{{ r.student.branch }}</td>
-                <td>{{ r.date }}</td>
+                <!-- Full date -->
+                <td>{{ r.date.strftime("%d-%m-%Y") if r.date else '' }}</td>
+                <!-- Month only -->
+                <td>{{ r.date.strftime("%B") if r.date else '' }}</td>
+                <!-- Year only -->
+                <td>{{ r.date.strftime("%Y") if r.date else '' }}</td>
                 <td>{{ r.status }}</td>
             </tr>
             {% else %}
-            <tr><td colspan="5">No records found.</td></tr>
+            <tr><td colspan="7">No records found.</td></tr>
             {% endfor %}
         </table>
 
