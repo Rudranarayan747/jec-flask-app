@@ -39,6 +39,7 @@ class Attendance(db.Model):
     student_id = db.Column(db.String(50), db.ForeignKey("student.id"))
     date = db.Column(db.Date, default=db.func.current_date())
     status = db.Column(db.String(10))
+    subject = db.Column(db.String(100))   # ✅ ADD THIS
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -461,20 +462,7 @@ def upload_pdf():
     flash("File uploaded successfully!", "success")
     return redirect(url_for("admin_dashboard"))
 
-# ---------------- Student Monthly/Semester Attendance ----------------
-@app.route("/student/monthly_attendance")
-@login_required
-def student_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-    return render_template("monthly_attendance.html")
 
-@app.route("/student/semester_attendance")
-@login_required
-def semester_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-    return render_template("semester_attendance.html")
 
 # ---------------- Add Notice ----------------
 @app.route("/add_notice", methods=["GET", "POST"])
