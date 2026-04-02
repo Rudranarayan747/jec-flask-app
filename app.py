@@ -30,7 +30,6 @@ class Student(UserMixin, db.Model):
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
     result = db.Column(db.String(50))
-    subject = db.Column(db.String(100))
     attendance_records = db.relationship("Attendance", backref="student", lazy=True)
 
 class Notice(db.Model):
@@ -58,18 +57,8 @@ def load_user(user_id):
     return Student.query.get(user_id)
 
 # ---------------- Utilities ----------------
-def calculate_attendance_percentage(student_id, month=None, year=None, semester=None):
-    query = Attendance.query.filter_by(student_id=student_id)
-    if month and year:
-        query = query.filter(
-            extract("month", Attendance.date) == month,
-            extract("year", Attendance.date) == year
-        )
-    if semester == "Jan-Jun":
-        query = query.filter(extract("month", Attendance.date).between(1, 6))
-    elif semester == "Jul-Dec":
-        query = query.filter(extract("month", Attendance.date).between(7, 12))
-    records = query.all()
+def calculate_attendance_percentage(student_id):
+    records = Attendance.query.filter_by(student_id=student_id).all()
     if not records:
         return 0
     total = len(records)
@@ -131,21 +120,12 @@ def student_dashboard():
         return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
     student = Student.query.get(current_user.id)
-    attendance_records = Attendance.query.filter_by(student_id=student.id).all()
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
-
     percent = calculate_attendance_percentage(student.id)
     eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
 
-    return render_template(
-        "student.html",
-        student=student,
-        notices=notices,
-        attendance=attendance_records,
-        files=files,
-        percent=percent,
-        eligible=eligible
-    )
+    return render_template("student.html", student=student, notices=notices,
+                           files=files, percent=percent, eligible=eligible)
 
 # ---------------- Admin Dashboard ----------------
 @app.route("/admin")
@@ -154,7 +134,7 @@ def admin_dashboard():
     if current_user.role != "admin":
         return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
-    students = Student.query.filter(Student.role == "student").all()
+    students = Student.query.filter(Student.role == "student").order_by(Student.id).all()  # Sequential order
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
     student_data = []
     for s in students:
@@ -162,6 +142,63 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
+
+# ---------------- Attendance Dashboard ----------------
+@app.route("/admin/attendance", methods=["GET", "POST"])
+@login_required
+def attendance_dashboard():
+    if current_user.role != "admin":
+        return "Access denied"
+    students = []
+    selected_branch = ""
+    selected_date = datetime.today().strftime("%Y-%m-%d")
+    overall_summary = []
+
+    if request.method == "POST":
+        selected_branch = request.form.get("branch")
+        selected_date = request.form.get("date")
+        students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
+
+        # Build overall summary
+        for s in students:
+            percent = calculate_attendance_percentage(s.id)
+            eligible = "Eligible" if percent >= 60 else "Not Eligible"
+            overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
+
+    return render_template("attendance.html", students=students, selected_branch=selected_branch,
+                           selected_date=selected_date, overall_summary=overall_summary)
+
+# ---------------- Submit Attendance ----------------
+@app.route("/admin/submit_attendance", methods=["POST"])
+@login_required
+def submit_attendance():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    date = request.form.get("date")
+    branch = request.form.get("branch")
+    students = Student.query.filter_by(branch=branch).all()
+
+    for s in students:
+        # Determine subjects
+        if s.branch.lower() == "cse":
+            subjects = ['Math','ETW','BME','Chem','BEE','EM']
+        else:
+            subjects = ['PCDS','Math','UHV','BEE','Phy','BCE']
+
+        for subj in subjects:
+            status = request.form.get(f"status_{s.id}_{subj}")
+            if status:
+                # Check if attendance already exists
+                existing = Attendance.query.filter_by(student_id=s.id, date=date, subject=subj).first()
+                if existing:
+                    existing.status = status
+                else:
+                    att = Attendance(student_id=s.id, date=date, subject=subj, period=subj, status=status)
+                    db.session.add(att)
+    db.session.commit()
+    flash("Attendance recorded successfully!", "success")
+    return redirect(url_for("attendance_dashboard"))
 
 # ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
@@ -178,34 +215,6 @@ def add_notice():
         flash("Notice added successfully", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("add_notice.html")
-
-# ---------------- Update Student ----------------
-@app.route("/admin/update_student/<reg>", methods=["POST"])
-@login_required
-def update_student(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if student:
-        student.branch = request.form.get("branch")
-        student.result = request.form.get("result")
-        db.session.commit()
-        flash("Student updated successfully", "success")
-    return redirect(url_for("admin_dashboard"))
-
-# ---------------- Delete Student ----------------
-@app.route("/admin/delete_student/<reg>")
-@login_required
-def delete_student(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if student:
-        Attendance.query.filter_by(student_id=reg).delete()
-        db.session.delete(student)
-        db.session.commit()
-        flash("Student deleted successfully", "success")
-    return redirect(url_for("admin_dashboard"))
 
 # ---------------- Upload PDF ----------------
 @app.route("/admin/upload_pdf", methods=["POST"])
