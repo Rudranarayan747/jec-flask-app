@@ -226,9 +226,6 @@ def submit_attendance():
                     existing.status = status
                 else:
                     att = Attendance(student_id=s.id, date=date_obj, subject=p.subject, period=p.subject, status=status)
-                   Here’s a **complete `app.py`** that ties everything together: login/register, student and admin dashboards, notices, file uploads, timetables, and section‑wise attendance. I’ve cleaned up indentation and ensured all routes are aligned properly so it should run without crashing.
-
-```python
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
