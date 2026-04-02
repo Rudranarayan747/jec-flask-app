@@ -51,6 +51,13 @@ class UploadedFile(db.Model):
     filepath = db.Column(db.String(300), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+class Timetable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    branch = db.Column(db.String(50))
+    day = db.Column(db.String(20))  # Monday, Tuesday, etc.
+    period = db.Column(db.Integer)
+    subject = db.Column(db.String(100))
+
 @login_manager.user_loader
 def load_user(user_id):
     return Student.query.get(user_id)
@@ -141,54 +148,41 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
-# ---------------- Update Student ----------------
-@app.route("/admin/update_student/<student_id>", methods=["POST"])
-@login_required
-def update_student(student_id):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(student_id)
-    if not student:
-        flash("Student not found", "danger")
-        return redirect(url_for("admin_dashboard"))
-    student.name = request.form.get("name")
-    student.branch = request.form.get("branch")
-    student.password = request.form.get("password")
-    student.result = request.form.get("result")
-    db.session.commit()
-    flash(f"Student {student_id} updated successfully!", "success")
-    return redirect(url_for("admin_dashboard"))
-
-# ---------------- Attendance Dashboard ----------------
+# ---------------- Admin Attendance Dashboard ----------------
 @app.route("/admin/attendance", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
 
+    selected_branch = request.form.get("branch", "")
+    selected_date = request.form.get("date", datetime.today().strftime("%Y-%m-%d"))
     students = []
-    selected_branch = ""
-    selected_date = datetime.today().strftime("%Y-%m-%d")
+    timetable = []
     overall_summary = []
 
-    if request.method == "POST":
-        selected_branch = request.form.get("branch", "").strip()
-        selected_date = request.form.get("date", datetime.today().strftime("%Y-%m-%d"))
+    if selected_branch:
         try:
             date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
         except ValueError:
             flash("Invalid date format", "danger")
             return redirect(url_for("attendance_dashboard"))
 
+        day_name = date_obj.strftime("%A")
         students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
+        timetable = Timetable.query.filter_by(branch=selected_branch, day=day_name).order_by(Timetable.period).all()
 
         for s in students:
             percent = calculate_attendance_percentage(s.id)
             eligible = "Eligible" if percent >= 60 else "Not Eligible"
             overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
 
-    return render_template("attendance.html", students=students, selected_branch=selected_branch,
-                           selected_date=selected_date, overall_summary=overall_summary)
+    return render_template("attendance.html",
+                           students=students,
+                           selected_branch=selected_branch,
+                           selected_date=selected_date,
+                           overall_summary=overall_summary,
+                           timetable=timetable)
 
 # ---------------- Submit Attendance ----------------
 @app.route("/admin/submit_attendance", methods=["POST"])
@@ -210,21 +204,57 @@ def submit_attendance():
         return redirect(url_for("attendance_dashboard"))
 
     students = Student.query.filter_by(branch=branch).all()
+    day_name = date_obj.strftime("%A")
+    timetable = Timetable.query.filter_by(branch=branch, day=day_name).all()
 
     for s in students:
-        subjects = ['Math','ETW','BME','Chem','BEE','EM'] if (s.branch or "").lower() == 'cse' else ['PCDS','Math','UHV','BEE','Phy','BCE']
-        for subj in subjects:
-            status = request.form.get(f"status_{s.id}_{subj}")
+        for p in timetable:
+            status = request.form.get(f"status_{s.id}_{p.subject}")
             if status:
-                existing = Attendance.query.filter_by(student_id=s.id, date=date_obj, subject=subj).first()
+                existing = Attendance.query.filter_by(student_id=s.id, date=date_obj, subject=p.subject).first()
                 if existing:
                     existing.status = status
                 else:
-                    att = Attendance(student_id=s.id, date=date_obj, subject=subj, period=subj, status=status)
+                    att = Attendance(student_id=s.id, date=date_obj, subject=p.subject, period=p.subject, status=status)
                     db.session.add(att)
+
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
+
+# ---------------- Search/View Attendance ----------------
+@app.route("/admin/search_attendance", methods=["GET", "POST"])
+@login_required
+def search_attendance():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    records = []
+    selected_student = None
+    selected_date = None
+
+    if request.method == "POST":
+        student_id = request.form.get("student_id")
+        date_str = request.form.get("date", "")
+        selected_student = Student.query.get(student_id)
+
+        if date_str:
+            try:
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                flash("Invalid date format", "danger")
+                return redirect(url_for("search_attendance"))
+            records = Attendance.query.filter_by(student_id=student_id, date=date_obj).all()
+            selected_date = date_obj
+        else:
+            records = Attendance.query.filter_by(student_id=student_id).all()
+
+    students = Student.query.filter(Student.role=="student").all()
+    return render_template("search_attendance.html",
+                           students=students,
+                           records=records,
+                           selected_student=selected_student,
+                           selected_date=selected_date)
 
 # ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
