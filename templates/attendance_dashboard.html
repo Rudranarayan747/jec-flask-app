@@ -4,73 +4,110 @@
     <title>Attendance Dashboard - JEC</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <header>
         <h1>Attendance Dashboard</h1>
     </header>
 
-    <!-- Attendance Form -->
+    <!-- Branch Selection -->
     <form method="POST">
+        <label for="branch">Select Branch:</label>
+        <select name="branch" id="branch" onchange="this.form.submit()">
+            <option value="">-- Select Branch --</option>
+            <option value="CSE" {% if selected_branch == 'CSE' %}selected{% endif %}>CSE</option>
+            <option value="Mechanical" {% if selected_branch == 'Mechanical' %}selected{% endif %}>Mechanical</option>
+            <option value="Civil" {% if selected_branch == 'Civil' %}selected{% endif %}>Civil</option>
+            <option value="Electrical" {% if selected_branch == 'Electrical' %}selected{% endif %}>Electrical</option>
+        </select>
+
+        <br><br>
+
+        <!-- Show Subjects -->
+        {% if selected_branch %}
+            <h3>Subjects for {{ selected_branch }}</h3>
+
+            {% if selected_branch.lower() == 'cse' %}
+                <p>Math, ETW, BME, Chem, BEE, EM</p>
+            {% elif selected_branch.lower() in ['mechanical','civil','electrical'] %}
+                <p>PCDS, Math, UHV, BEE, Phy, BCE</p>
+            {% else %}
+                <p>General</p>
+            {% endif %}
+        {% endif %}
+
+        <br>
+
+        <!-- Attendance Form -->
         <label for="date">Select Date:</label>
         <input type="date" id="date" name="date" required>
 
+        <br><br>
+
+        {% if students %}
         <table border="1">
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
                 <th>Branch</th>
-                <th>Subject</th> <!-- ✅ New column -->
+                <th>Subject</th>
                 <th>Status</th>
             </tr>
-            {% for student in students %}
-            <!-- Loop through subjects based on branch -->
-            {% if student.branch.lower() == 'cse' %}
-                {% set subjects = ['Math','ETW','BME','Chem','BEE','EM'] %}
-            {% elif student.branch.lower() in ['mechanical','civil','electrical'] %}
-                {% set subjects = ['PCDS','Math','UHV','BEE','Phy','BCE'] %}
-            {% else %}
-                {% set subjects = ['General'] %}
-            {% endif %}
 
-            {% for subj in subjects %}
-            <tr>
-                <td>{{ student.id }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.branch }}</td>
-                <td>{{ subj }}</td> <!-- ✅ Show subject -->
-                <td>
-                    <select name="status_{{ student.id }}_{{ subj }}">
-                        <option value="Present">Present</option>
-                        <option value="Absent">Absent</option>
-                    </select>
-                </td>
-            </tr>
-            {% endfor %}
-            {% else %}
-            <tr><td colspan="5">No students found.</td></tr>
+            {% for student in students %}
+
+                {% if student.branch.lower() == 'cse' %}
+                    {% set subjects = ['Math','ETW','BME','Chem','BEE','EM'] %}
+                {% elif student.branch.lower() in ['mechanical','civil','electrical'] %}
+                    {% set subjects = ['PCDS','Math','UHV','BEE','Phy','BCE'] %}
+                {% else %}
+                    {% set subjects = ['General'] %}
+                {% endif %}
+
+                {% for subj in subjects %}
+                <tr>
+                    <td>{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.branch }}</td>
+                    <td>{{ subj }}</td>
+                    <td>
+                        <select name="status_{{ student.id }}_{{ subj }}">
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+
             {% endfor %}
         </table>
 
+        <br>
         <button type="submit">Submit Attendance</button>
+
+        {% else %}
+            <p>Please select a branch to view students.</p>
+        {% endif %}
     </form>
 
-    <!-- Attendance Summary -->
+    <!-- Subject-wise Attendance Summary -->
     <h2>Subject-wise Attendance Summary</h2>
     <table border="1">
         <tr>
             <th>Reg No</th>
             <th>Name</th>
             <th>Branch</th>
-            <th>Subject</th> <!-- ✅ New column -->
+            <th>Subject</th>
             <th>Attendance %</th>
             <th>Eligibility</th>
         </tr>
+
         {% for s in summary %}
         <tr>
             <td>{{ s.student.id }}</td>
             <td>{{ s.student.name }}</td>
             <td>{{ s.student.branch }}</td>
-            <td>{{ s.subject }}</td> <!-- ✅ Show subject -->
+            <td>{{ s.subject }}</td>
             <td>{{ s.percent|round(2) }}%</td>
             <td>{{ s.eligible }}</td>
         </tr>
@@ -79,6 +116,35 @@
         {% endfor %}
     </table>
 
+    <br>
+
+    <!-- Overall Attendance Summary -->
+    <h2>Overall Attendance Summary</h2>
+    <table border="1">
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Branch</th>
+            <th>Overall %</th>
+            <th>Eligibility</th>
+        </tr>
+
+        {% for o in overall_summary %}
+        <tr>
+            <td>{{ o.student.id }}</td>
+            <td>{{ o.student.name }}</td>
+            <td>{{ o.student.branch }}</td>
+            <td>{{ o.percent|round(2) }}%</td>
+            <td>{{ o.eligible }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">No overall attendance yet.</td></tr>
+        {% endfor %}
+    </table>
+
+    <br>
+
     <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+
 </body>
 </html>
