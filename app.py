@@ -162,6 +162,7 @@ def attendance_dashboard():
 
     students, timetable, overall_summary = [], [], []
     section_summary = defaultdict(list)
+    subject_summary = []  # NEW: subject-wise summary
 
     if selected_branch and selected_section:
         try:
@@ -174,12 +175,28 @@ def attendance_dashboard():
         students = Student.query.filter_by(branch=selected_branch, section=selected_section).order_by(Student.id).all()
         timetable = Timetable.query.filter_by(branch=selected_branch, section=selected_section, day=day_name).order_by(Timetable.period).all()
 
+        # Student overall summary
         for s in students:
             percent = calculate_attendance_percentage(s.id)
             eligible = "Eligible" if percent >= 60 else "Not Eligible"
             overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
             section_summary[s.section].append(percent)
 
+        # Subject-wise summary
+        for p in timetable:
+            present_count = Attendance.query.filter_by(date=date_obj, subject=p.subject, status="Present").count()
+            absent_count = Attendance.query.filter_by(date=date_obj, subject=p.subject, status="Absent").count()
+            off_count = Attendance.query.filter_by(date=date_obj, subject=p.subject, status="Off").count()
+
+            subject_summary.append({
+                "period": p.period,
+                "subject": p.subject,
+                "present": present_count,
+                "absent": absent_count,
+                "off": off_count
+            })
+
+    # Section averages
     section_data = []
     for sec, percents in section_summary.items():
         avg = sum(percents) / len(percents) if percents else 0
@@ -192,7 +209,9 @@ def attendance_dashboard():
                            selected_date=selected_date,
                            overall_summary=overall_summary,
                            section_data=section_data,
-                           timetable=timetable)
+                           timetable=timetable,
+                           subject_summary=subject_summary)  # pass to template
+
   # ---------------- Submit Attendance ----------------
 @app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
@@ -240,38 +259,53 @@ def submit_attendance():
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
 
-# ---------------- Search Attendance ----------------
-@app.route("/admin/search_attendance", methods=["GET", "POST"])
+# ---------------- Submit Attendance ----------------
+@app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
-def search_attendance():
+def submit_attendance():
     if current_user.role != "admin":
         return "Access denied"
 
-    records = []
-    selected_student = None
-    selected_date = None
+    date_str = request.form.get("date")
+    branch = request.form.get("branch", "").strip()
+    section = request.form.get("section", "").strip()
+    if not branch or not section:
+        flash("Branch and Section are required", "danger")
+        return redirect(url_for("attendance_dashboard"))
 
-    if request.method == "POST":
-        student_id = request.form.get("student_id")
-        date_str = request.form.get("date", "")
-        selected_student = Student.query.get(student_id)
-        if date_str:
-            try:
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-            except ValueError:
-                flash("Invalid date format", "danger")
-                return redirect(url_for("search_attendance"))
-            records = Attendance.query.filter_by(student_id=student_id, date=date_obj).all()
-            selected_date = date_obj
-        else:
-            records = Attendance.query.filter_by(student_id=student_id).all()
+    try:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        flash("Invalid date format", "danger")
+        return redirect(url_for("attendance_dashboard"))
 
-    students = Student.query.filter(Student.role=="student").all()
-    return render_template("search_attendance.html",
-                           students=students,
-                           records=records,
-                           selected_student=selected_student,
-                           selected_date=selected_date)
+    students = Student.query.filter_by(branch=branch, section=section).all()
+    day_name = date_obj.strftime("%A")
+    timetable = Timetable.query.filter_by(branch=branch, section=section, day=day_name).all()
+
+    for s in students:
+        for p in timetable:
+            # Default to "Off" if nothing selected
+            status = request.form.get(f"status_{s.id}_{p.id}", "Off")
+            existing = Attendance.query.filter_by(
+                student_id=s.id, date=date_obj, subject=p.subject
+            ).first()
+            if existing:
+                existing.status = status
+            else:
+                att = Attendance(
+                    student_id=s.id,
+                    date=date_obj,
+                    subject=p.subject,
+                    period=p.period,
+                    status=status
+                )
+                db.session.add(att)
+
+    db.session.commit()
+    flash("Attendance recorded successfully!", "success")
+    return redirect(url_for("attendance_dashboard"))
+
     # ---------------- Update Student ----------------
 @app.route("/admin/update_student/<student_id>", methods=["POST"])
 @login_required
