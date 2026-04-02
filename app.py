@@ -141,6 +141,24 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
+# ---------------- Update Student ----------------
+@app.route("/admin/update_student/<student_id>", methods=["POST"])
+@login_required
+def update_student(student_id):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(student_id)
+    if not student:
+        flash("Student not found", "danger")
+        return redirect(url_for("admin_dashboard"))
+    student.name = request.form.get("name")
+    student.branch = request.form.get("branch")
+    student.password = request.form.get("password")
+    student.result = request.form.get("result")
+    db.session.commit()
+    flash(f"Student {student_id} updated successfully!", "success")
+    return redirect(url_for("admin_dashboard"))
+
 # ---------------- Attendance Dashboard ----------------
 @app.route("/admin/attendance", methods=["GET", "POST"])
 @login_required
