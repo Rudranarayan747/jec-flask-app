@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from sqlalchemy import extract
 
 # ---------------- App Config ----------------
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -74,8 +73,8 @@ def home():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        reg = request.form["username"]
-        password = request.form["password"]
+        reg = request.form.get("username")
+        password = request.form.get("password")
         user = Student.query.get(reg)
         if user and user.password == password:
             login_user(user)
@@ -93,10 +92,10 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        reg = request.form["reg"]
-        name = request.form["name"]
-        branch = request.form["branch"]
-        password = request.form["password"]
+        reg = request.form.get("reg")
+        name = request.form.get("name")
+        branch = request.form.get("branch")
+        password = request.form.get("password")
 
         if Student.query.get(reg):
             flash("Registration number already exists", "danger")
@@ -123,7 +122,6 @@ def student_dashboard():
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
     percent = calculate_attendance_percentage(student.id)
     eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-
     return render_template("student.html", student=student, notices=notices,
                            files=files, percent=percent, eligible=eligible)
 
@@ -134,7 +132,7 @@ def admin_dashboard():
     if current_user.role != "admin":
         return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
-    students = Student.query.filter(Student.role == "student").order_by(Student.id).all()  # Sequential order
+    students = Student.query.filter(Student.role == "student").order_by(Student.id).all()
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
     student_data = []
     for s in students:
@@ -150,33 +148,31 @@ def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
 
+    students = []
     selected_branch = ""
     selected_date = datetime.today().strftime("%Y-%m-%d")
-    students = []
     overall_summary = []
 
     if request.method == "POST":
         selected_branch = request.form.get("branch", "").strip()
         selected_date = request.form.get("date", datetime.today().strftime("%Y-%m-%d"))
         try:
-            datetime.strptime(selected_date, "%Y-%m-%d")  # validate date
+            date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
         except ValueError:
             flash("Invalid date format", "danger")
             return redirect(url_for("attendance_dashboard"))
 
-        if selected_branch:
-            students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
+        students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
 
         for s in students:
             percent = calculate_attendance_percentage(s.id)
             eligible = "Eligible" if percent >= 60 else "Not Eligible"
             overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
 
-    return render_template("attendance.html",
-                           students=students,
-                           selected_branch=selected_branch,
-                           selected_date=selected_date,
-                           overall_summary=overall_summary)
+    return render_template("attendance.html", students=students, selected_branch=selected_branch,
+                           selected_date=selected_date, overall_summary=overall_summary)
+
+# ---------------- Submit Attendance ----------------
 @app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
 def submit_attendance():
@@ -198,8 +194,7 @@ def submit_attendance():
     students = Student.query.filter_by(branch=branch).all()
 
     for s in students:
-        subjects = ['Math','ETW','BME','Chem','BEE','EM'] if s.branch.lower() == 'cse' else ['PCDS','Math','UHV','BEE','Phy','BCE']
-
+        subjects = ['Math','ETW','BME','Chem','BEE','EM'] if (s.branch or "").lower() == 'cse' else ['PCDS','Math','UHV','BEE','Phy','BCE']
         for subj in subjects:
             status = request.form.get(f"status_{s.id}_{subj}")
             if status:
@@ -212,6 +207,7 @@ def submit_attendance():
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
+
 # ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
 @login_required
@@ -219,8 +215,8 @@ def add_notice():
     if current_user.role != "admin":
         return "Access denied"
     if request.method == "POST":
-        title = request.form["title"]
-        content = request.form["content"]
+        title = request.form.get("title")
+        content = request.form.get("content")
         notice = Notice(title=title, content=content)
         db.session.add(notice)
         db.session.commit()
