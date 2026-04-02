@@ -249,6 +249,27 @@ def search_attendance():
                            records=records,
                            selected_student=selected_student,
                            selected_date=selected_date)
+    # ---------------- Update Student ----------------
+@app.route("/admin/update_student/<student_id>", methods=["POST"])
+@login_required
+def update_student(student_id):
+    if current_user.role != "admin":
+        return "Access denied"
+
+    student = Student.query.get(student_id)
+    if not student:
+        flash("Student not found", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    # Get updated fields from form
+    student.name = request.form.get("name")
+    student.branch = request.form.get("branch")
+    student.password = request.form.get("password")
+    student.result = request.form.get("result")
+
+    db.session.commit()
+    flash("Student updated successfully!", "success")
+    return redirect(url_for("admin_dashboard"))
 
 # ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
