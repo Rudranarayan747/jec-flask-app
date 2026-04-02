@@ -54,18 +54,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if student.branch.lower() == 'cse' %}
-                        {% set subjects = ['Math','ETW','BME','Chem','BEE','EM'] %}
-                    {% else %}
-                        {% set subjects = ['PCDS','Math','UHV','BEE','Phy','BCE'] %}
-                    {% endif %}
-
-                    {% for period, subj in enumerate(subjects, start=1) %}
+                    {% for slot in timetable %}
                     <tr>
-                        <td>{{ period }}</td>
-                        <td>{{ subj }}</td>
+                        <td>{{ slot.period }}</td>
+                        <td>{{ slot.subject }}</td>
                         <td>
-                            <select name="status_{{ student.id }}_{{ subj }}">
+                            <select name="status_{{ student.id }}_{{ slot.subject }}">
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
                             </select>
@@ -75,6 +69,7 @@
                 </tbody>
             </table>
         {% endfor %}
+
         <button type="submit">Submit Attendance</button>
     </form>
     {% endif %}
