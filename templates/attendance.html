@@ -1,46 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Attendance Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
-    <h2>Attendance Dashboard</h2>
-    <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    <header>
+        <h1>Attendance Dashboard</h1>
+    </header>
 
-    <form method="POST">
-        Branch: <input type="text" name="branch" value="{{ selected_branch }}" required>
-        Date: <input type="date" name="date" value="{{ selected_date }}" required>
-        <button type="submit">Select</button>
+    <!-- Filter Form -->
+    <form method="POST" action="{{ url_for('attendance_dashboard') }}">
+        <label for="branch">Branch:</label>
+        <input type="text" name="branch" value="{{ selected_branch }}" required>
+
+        <label for="section">Section:</label>
+        <select name="section" required>
+            <option value="A" {% if selected_section=="A" %}selected{% endif %}>Section A</option>
+            <option value="B" {% if selected_section=="B" %}selected{% endif %}>Section B</option>
+            <option value="C" {% if selected_section=="C" %}selected{% endif %}>Section C</option>
+        </select>
+
+        <label for="date">Date:</label>
+        <input type="date" name="date" value="{{ selected_date }}" required>
+
+        <button type="submit">View Attendance</button>
     </form>
 
-    {% if students %}
+    <!-- Timetable Grid -->
+    <h2>Timetable - Section {{ selected_section }}</h2>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+        </tr>
+        {% for p in timetable %}
+        <tr>
+            <td>{{ p.period }}</td>
+            <td>{{ p.subject if p.day=="Monday" else "" }}</td>
+            <td>{{ p.subject if p.day=="Tuesday" else "" }}</td>
+            <td>{{ p.subject if p.day=="Wednesday" else "" }}</td>
+            <td>{{ p.subject if p.day=="Thursday" else "" }}</td>
+            <td>{{ p.subject if p.day=="Friday" else "" }}</td>
+            <td>{{ p.subject if p.day=="Saturday" else "" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Student Attendance -->
+    <h2>Student Attendance - Section {{ selected_section }}</h2>
     <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
+        <input type="hidden" name="section" value="{{ selected_section }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
-        <table border="1">
+
+        <table>
             <tr>
-                <th>Student</th>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Attendance %</th>
+                <th>Eligibility</th>
                 {% for p in timetable %}
-                    <th>{{ p.subject }}</th>
+                <th>{{ p.subject }}</th>
                 {% endfor %}
             </tr>
             {% for s in students %}
             <tr>
+                <td>{{ s.id }}</td>
                 <td>{{ s.name }}</td>
+                <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
+                <td>{{ overall_summary[loop.index0].eligible }}</td>
                 {% for p in timetable %}
-                    <td>
-                        <select name="status_{{ s.id }}_{{ p.subject }}">
-                            <option value="Present">Present</option>
-                            <option value="Absent">Absent</option>
-                        </select>
-                    </td>
+                <td>
+                    <select name="status_{{ s.id }}_{{ p.subject }}">
+                        <option value="">--</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                </td>
                 {% endfor %}
             </tr>
             {% endfor %}
         </table>
         <button type="submit">Submit Attendance</button>
     </form>
-    {% endif %}
+
+    <!-- Section Summary -->
+    <h2>Section-wise Attendance Summary</h2>
+    <table>
+        <tr>
+            <th>Section</th>
+            <th>Average Attendance %</th>
+        </tr>
+        {% for sec in section_data %}
+        <tr>
+            <td>{{ sec.section }}</td>
+            <td>{{ sec.average|round(2) }}%</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="2">No section data available.</td></tr>
+        {% endfor %}
+    </table>
+
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
 </body>
 </html>
