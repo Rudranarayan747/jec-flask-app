@@ -45,7 +45,7 @@ class Attendance(db.Model):
     date = db.Column(db.Date, default=db.func.current_date())
     status = db.Column(db.String(10))
     subject = db.Column(db.String(100))
-    period = db.Column(db.String(50))  # Timetable period/slot
+    period = db.Column(db.String(50))
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -177,7 +177,7 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
-# ---------------- Add Notice Route ----------------
+# ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
 @login_required
 def add_notice():
@@ -192,6 +192,67 @@ def add_notice():
         flash("Notice added successfully", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("add_notice.html")
+
+# ---------------- Update Student ----------------
+@app.route("/admin/update_student/<reg>", methods=["POST"])
+@login_required
+def update_student(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if student:
+        student.branch = request.form["branch"]
+        student.result = request.form["result"]
+        db.session.commit()
+        flash("Student updated successfully", "success")
+    return redirect(url_for("admin_dashboard"))
+
+# ---------------- Delete Student ----------------
+@app.route("/admin/delete_student/<reg>")
+@login_required
+def delete_student(reg):
+    if current_user.role != "admin":
+        return "Access denied"
+    student = Student.query.get(reg)
+    if student:
+        db.session.delete(student)
+        db.session.commit()
+        flash("Student deleted successfully", "success")
+    return redirect(url_for("admin_dashboard"))
+
+# ---------------- Upload PDF ----------------
+@app.route("/admin/upload_pdf", methods=["POST"])
+@login_required
+def upload_pdf():
+    if current_user.role != "admin":
+        return "Access denied"
+    file = request.files.get("pdf")
+    if file:
+        filename = file.filename
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+        uploaded = UploadedFile(filename=filename, filepath=filepath)
+        db.session.add(uploaded)
+        db.session.commit()
+        flash("PDF uploaded successfully", "success")
+    return redirect(url_for("admin_dashboard"))
+
+# ---------------- Attendance Dashboard ----------------
+@app.route("/admin/attendance_dashboard")
+@login_required
+def attendance_dashboard():
+    if current_user.role != "admin":
+        return "Access denied"
+    students = Student.query.filter(Student.role == "student").all()
+    return render_template("attendance_dashboard.html", students=students)
+
+# ---------------- Search Attendance ----------------
+@app.route("/admin/search_attendance")
+@login_required
+def search_attendance():
+    if current_user.role != "admin":
+        return "Access denied"
+    return render_template("search_attendance.html")  # create this template
 
 # ---------------- Initialize DB ----------------
 with app.app_context():
