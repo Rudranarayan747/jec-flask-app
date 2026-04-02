@@ -5,93 +5,89 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-        <h1>Admin Dashboard</h1>
-    </header>
+<header>
+    <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+    <h1>Admin Dashboard</h1>
+</header>
 
-    <h2>Welcome, {{ current_user.name }}</h2>
+<h2>Welcome, {{ current_user.name }}</h2>
 
-    <!-- Notices Section -->
-    <h2>Notices</h2>
-    <p><a href="{{ url_for('add_notice') }}">Add New Notice</a></p>
-    <ul>
-        {% for n in notices %}
-        <li>
-            <strong>{{ n.title }}</strong> - 
-            {{ n.date_posted.strftime('%Y-%m-%d') if n.date_posted else '' }}<br>
-            {{ n.content }}
-        </li>
-        {% else %}
-        <li>No notices yet.</li>
-        {% endfor %}
-    </ul>
+<!-- Notices Section -->
+<h2>Notices</h2>
+<a href="{{ url_for('add_notice') }}">Add New Notice</a>
+<ul>
+    {% for n in notices %}
+    <li>
+        <strong>{{ n.title }}</strong> - 
+        {{ n.date_posted.strftime('%Y-%m-%d') if n.date_posted else '' }}<br>
+        {{ n.content }}
+    </li>
+    {% else %}
+    <li>No notices yet.</li>
+    {% endfor %}
+</ul>
 
-    <!-- Student Management -->
-    <h2>Manage Students</h2>
-    <table border="1">
-        <tr>
-            <th>Reg No</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Result</th>
-            <th>Attendance %</th>
-            <th>Eligibility</th>
-            <th>Actions</th>
-        </tr>
-        {% for s in students %}
-        <tr>
-            <td>{{ s.student.id }}</td>
-            <td>{{ s.student.name }}</td>
-            <td>{{ s.student.branch }}</td>
-            <td>{{ s.student.result }}</td>
-            <td>{{ s.percent|round(2) }}%</td>
-            <td>{{ s.eligible }}</td>
-            <td>
-                <!-- Inline update form -->
-                <form action="{{ url_for('update_student', reg=s.student.id) }}" method="POST" style="display:inline;">
-                    <input type="text" name="branch" value="{{ s.student.branch }}" required>
-                    <input type="text" name="result" value="{{ s.student.result }}" required>
-                    <button type="submit">Update</button>
-                </form>
-                <!-- Delete link -->
-                <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="7">No students found.</td></tr>
-        {% endfor %}
-    </table>
+<!-- Student Management -->
+<h2>Manage Students</h2>
+<table border="1">
+    <tr>
+        <th>Reg No</th>
+        <th>Name</th>
+        <th>Branch</th>
+        <th>Result</th>
+        <th>Attendance %</th>
+        <th>Eligibility</th>
+        <th>Actions</th>
+    </tr>
+    {% for s in students %}
+    <tr>
+        <td>{{ s.student.id }}</td>
+        <td>{{ s.student.name }}</td>
+        <td>{{ s.student.branch }}</td>
+        <td>{{ s.student.result }}</td>
+        <td>{{ s.percent|round(2) }}%</td>
+        <td>{{ s.eligible }}</td>
+        <td>
+            <!-- Inline update form -->
+            <form action="{{ url_for('update_student', reg=s.student.id) }}" method="POST" style="display:inline;">
+                <input type="text" name="branch" value="{{ s.student.branch }}" required>
+                <input type="text" name="result" value="{{ s.student.result }}" required>
+                <button type="submit">Update</button>
+            </form>
+            <!-- Delete link -->
+            <a href="{{ url_for('delete_student', reg=s.student.id) }}">Delete</a>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">No students found.</td></tr>
+    {% endfor %}
+</table>
 
-    <!-- Search Attendance -->
-    <h2>Search Attendance</h2>
-    <p><a href="{{ url_for('search_attendance') }}">Search by Branch</a></p>
+<!-- Search Attendance -->
+<h2>Search Attendance</h2>
+<p><a href="{{ url_for('attendance_dashboard') }}">Go to Attendance Dashboard</a></p>
 
-    <!-- Upload PDF -->
-    <h2>Upload PDF</h2>
-    <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data">
-        <input type="file" name="pdf" accept="application/pdf" required>
-        <button type="submit">Upload PDF</button>
-    </form>
+<!-- Upload PDF -->
+<h2>Upload PDF</h2>
+<form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="pdf" accept="application/pdf" required>
+    <button type="submit">Upload PDF</button>
+</form>
 
-    <!-- Uploaded Files -->
-    <h2>Uploaded Files</h2>
-    <ul>
-        {% for file in files %}
-        <li>
-            <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
-                {{ file.filename }}
-            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
-        </li>
-        {% else %}
-        <li>No files uploaded yet.</li>
-        {% endfor %}
-    </ul>
+<!-- Uploaded Files -->
+<h2>Uploaded Files</h2>
+<ul>
+    {% for file in files %}
+    <li>
+        <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
+            {{ file.filename }}
+        </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
+    </li>
+    {% else %}
+    <li>No files uploaded yet.</li>
+    {% endfor %}
+</ul>
 
-    <!-- Attendance Management -->
-    <h2>Attendance Management</h2>
-    <p><a href="{{ url_for('attendance_dashboard') }}">Go to Attendance Dashboard</a></p>
-
-    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+<p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 </html>
