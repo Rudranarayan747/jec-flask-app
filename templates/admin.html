@@ -14,18 +14,23 @@
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
         a { text-decoration: none; color: #007BFF; }
         a:hover { text-decoration: underline; }
-        form { display: inline; }
+        form.inline { display: inline-block; }
         button { padding: 5px 10px; margin: 5px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 4px; box-sizing: border-box; }
+        input[type="file"] { margin-right: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Admin Dashboard</h1>
-    <a href="{{ url_for('home') }}">← Back to Home</a> |
-    <a href="{{ url_for('attendance_dashboard') }}">Manage Attendance</a> |
-    <a href="{{ url_for('add_notice') }}">Add Notice</a> |
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <nav style="text-align:center; margin-bottom: 20px;">
+        <a href="{{ url_for('home') }}">← Back to Home</a> |
+        <a href="{{ url_for('attendance_dashboard') }}">Manage Attendance</a> |
+        <a href="{{ url_for('add_notice') }}">Add Notice</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
 
+    <!-- Notices -->
     <h2>Notices</h2>
     <table>
         <thead>
@@ -46,30 +51,47 @@
         </tbody>
     </table>
 
-    <h2>Students Attendance Summary</h2>
+    <!-- Students Attendance and Update -->
+    <h2>Students Attendance & Info</h2>
     <table>
         <thead>
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
                 <th>Branch</th>
+                <th>Password</th>
+                <th>Result</th>
                 <th>Attendance %</th>
                 <th>Eligibility</th>
+                <th>Update</th>
             </tr>
         </thead>
         <tbody>
             {% for record in students %}
             <tr>
+                <form action="{{ url_for('update_student', student_id=record.student.id) }}" method="POST" class="inline">
                 <td>{{ record.student.id }}</td>
-                <td>{{ record.student.name }}</td>
-                <td>{{ record.student.branch }}</td>
+                <td><input type="text" name="name" value="{{ record.student.name }}"></td>
+                <td><input type="text" name="branch" value="{{ record.student.branch }}"></td>
+                <td><input type="password" name="password" value="{{ record.student.password }}"></td>
+                <td><input type="text" name="result" value="{{ record.student.result }}"></td>
                 <td>{{ "%.2f"|format(record.percent) }}%</td>
                 <td>{{ record.eligible }}</td>
+                <td><button type="submit">Update</button></td>
+                </form>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
+    <!-- Upload PDF -->
+    <h2>Upload PDF</h2>
+    <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" style="text-align:center; margin-bottom:20px;">
+        <input type="file" name="pdf" accept="application/pdf" required>
+        <button type="submit">Upload PDF</button>
+    </form>
+
+    <!-- Uploaded Files -->
     <h2>Uploaded Files</h2>
     <table>
         <thead>
@@ -89,4 +111,4 @@
     </table>
 </div>
 </body>
-</html>
+</html>s
