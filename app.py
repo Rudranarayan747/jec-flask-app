@@ -193,8 +193,7 @@ def attendance_dashboard():
                            overall_summary=overall_summary,
                            section_data=section_data,
                            timetable=timetable)
-    # ---------------- Submit Attendance ----------------
-@app.route("/admin/submit_attendance", methods=["POST"])
+   @app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
 def submit_attendance():
     if current_user.role != "admin":
