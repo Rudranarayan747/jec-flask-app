@@ -1,20 +1,22 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.utils import secure_filename
 from sqlalchemy import extract
 
 # ---------------- App Config ----------------
-os.makedirs("instance", exist_ok=True)  # writable folder for Render
-os.makedirs(os.path.join("instance", "uploads"), exist_ok=True)
+base_dir = os.path.abspath(os.path.dirname(__file__))
+instance_dir = os.path.join(base_dir, "instance")
+upload_dir = os.path.join(instance_dir, "uploads")
+os.makedirs(instance_dir, exist_ok=True)
+os.makedirs(upload_dir, exist_ok=True)
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/jec.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(instance_dir, 'jec.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "secret"
-app.config["UPLOAD_FOLDER"] = os.path.join("instance", "uploads")
+app.config["UPLOAD_FOLDER"] = upload_dir
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -43,7 +45,7 @@ class Attendance(db.Model):
     date = db.Column(db.Date, default=db.func.current_date())
     status = db.Column(db.String(10))
     subject = db.Column(db.String(100))
-    period = db.Column(db.String(50))  # ✅ Timetable period/slot
+    period = db.Column(db.String(50))  # Timetable period/slot
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,7 +67,6 @@ def calculate_attendance_percentage(student_id, month=None, year=None, semester=
         query = query.filter(extract("month", Attendance.date).between(1, 6))
     elif semester == "Jul-Dec":
         query = query.filter(extract("month", Attendance.date).between(7, 12))
-
     records = query.all()
     if not records:
         return 0
@@ -87,10 +88,7 @@ def login():
         user = Student.query.get(reg)
         if user and user.password == password:
             login_user(user)
-            if user.role == "admin":
-                return redirect(url_for("admin_dashboard"))
-            else:
-                return redirect(url_for("student_dashboard"))
+            return redirect(url_for("admin_dashboard") if user.role == "admin" else url_for("student_dashboard"))
         flash("Invalid credentials", "danger")
     return render_template("login.html")
 
@@ -113,15 +111,12 @@ def register():
             flash("Registration number already exists", "danger")
             return render_template("register.html")
 
-        new_student = Student(
-            id=reg, name=name, branch=branch, password=password,
-            role="student", result="Not Available"
-        )
+        new_student = Student(id=reg, name=name, branch=branch, password=password,
+                              role="student", result="Not Available")
         db.session.add(new_student)
         db.session.commit()
         flash("Registration successful! Please login.", "success")
         return redirect(url_for("login"))
-
     return render_template("register.html")
 
 # ---------------- Student Dashboard ----------------
@@ -149,7 +144,6 @@ def timetable_attendance():
     if current_user.role != "student":
         return "Access denied"
     student = Student.query.get(current_user.id)
-    # Group by date and period
     records = Attendance.query.filter_by(student_id=student.id).order_by(Attendance.date, Attendance.period).all()
     timetable = {}
     for r in records:
@@ -179,17 +173,9 @@ def admin_dashboard():
 with app.app_context():
     db.create_all()
     if not Student.query.get("admin"):
-        db.session.add(Student(
-            id="admin",
-            name="Administrator",
-            password="admin123",
-            role="admin"
-        ))
+        db.session.add(Student(id="admin", name="Administrator", password="admin123", role="admin"))
     if not Notice.query.first():
-        db.session.add(Notice(
-            title="Welcome Notice",
-            content="Welcome to the Attendance Management System."
-        ))
+        db.session.add(Notice(title="Welcome Notice", content="Welcome to the Attendance Management System."))
     db.session.commit()
 
 # ---------------- Run App ----------------
