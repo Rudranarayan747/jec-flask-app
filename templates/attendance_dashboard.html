@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Attendance Dashboard</title>
+    <title>Attendance Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
@@ -22,7 +22,6 @@
     <h1>Admin - Attendance Dashboard</h1>
     <a href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
 
-    <!-- Branch & Date Selection Form -->
     <form method="POST">
         <label for="branch">Select Branch:</label>
         <select name="branch" id="branch" required>
@@ -40,7 +39,6 @@
     </form>
 
     {% if students %}
-    <!-- Attendance Submission Form -->
     <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
@@ -77,14 +75,12 @@
                 </tbody>
             </table>
         {% endfor %}
-
         <button type="submit">Submit Attendance</button>
     </form>
     {% endif %}
 
-    <!-- Overall Attendance Summary -->
-    <h2>Overall Attendance Summary</h2>
     {% if overall_summary %}
+    <h2>Overall Attendance Summary</h2>
     <table>
         <thead>
             <tr>
