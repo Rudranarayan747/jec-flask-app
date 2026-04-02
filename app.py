@@ -211,37 +211,46 @@ def attendance_dashboard():
                            section_data=section_data,
                            timetable=timetable,
                            subject_summary=subject_summary)  # pass to template
-# ---------------- Submit Attendance ----------------
+    # ---------------- Submit Attendance ----------------
 @app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
 def submit_attendance():
     if current_user.role != "admin":
         return "Access denied"
 
+    # Get form inputs
     date_str = request.form.get("date")
     branch = request.form.get("branch", "").strip()
     section = request.form.get("section", "").strip()
+
     if not branch or not section:
         flash("Branch and Section are required", "danger")
         return redirect(url_for("attendance_dashboard"))
 
+    # Validate date
     try:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         flash("Invalid date format", "danger")
         return redirect(url_for("attendance_dashboard"))
 
+    # Fetch students and timetable
     students = Student.query.filter_by(branch=branch, section=section).all()
     day_name = date_obj.strftime("%A")
     timetable = Timetable.query.filter_by(branch=branch, section=section, day=day_name).all()
 
+    # Loop through students and subjects
     for s in students:
         for p in timetable:
             # Default to "Off" if nothing selected
             status = request.form.get(f"status_{s.id}_{p.id}", "Off")
+
             existing = Attendance.query.filter_by(
-                student_id=s.id, date=date_obj, subject=p.subject
+                student_id=s.id,
+                date=date_obj,
+                subject=p.subject
             ).first()
+
             if existing:
                 existing.status = status
             else:
@@ -254,10 +263,10 @@ def submit_attendance():
                 )
                 db.session.add(att)
 
+    # Commit changes
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
-
 
     # ---------------- Update Student ----------------
 @app.route("/admin/update_student/<student_id>", methods=["POST"])
