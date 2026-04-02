@@ -272,8 +272,8 @@ def delete_student(reg):
 
     return render_template("delete_student.html", student=student)
     @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
-@login_required
-def attendance_dashboard():
+    @login_required
+    def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
 
