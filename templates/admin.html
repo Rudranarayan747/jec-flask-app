@@ -19,6 +19,7 @@
         .btn-add { background-color: #28a745; color: white; }
         .btn-upload { background-color: #17a2b8; color: white; }
         .btn-attendance { background-color: #ffc107; color: white; }
+        form input { margin: 2px; padding: 3px; }
     </style>
 </head>
 <body>
@@ -108,7 +109,7 @@
                 <tr>
                     <td>{{ file.filename }}</td>
                     <td>{{ file.uploaded_at.strftime("%Y-%m-%d %H:%M") }}</td>
-                    <td><a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">Download</a></td>
+                    <td><a href="{{ url_for('download_file', filename=file.filename) }}" target="_blank">Download</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
