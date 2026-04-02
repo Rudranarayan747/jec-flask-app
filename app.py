@@ -267,6 +267,22 @@ def submit_attendance():
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
+    # ---------------- Search Attendance ----------------
+@app.route("/admin/search_attendance", methods=["GET", "POST"])
+@login_required
+def search_attendance():
+    if current_user.role != "admin":
+        return "Access denied"
+
+    # Example: show a search form or results
+    students = []
+    if request.method == "POST":
+        reg_no = request.form.get("reg_no")
+        if reg_no:
+            students = Attendance.query.filter_by(student_id=reg_no).all()
+
+    return render_template("search_attendance.html", students=students)
+
 
     # ---------------- Update Student ----------------
 @app.route("/admin/update_student/<student_id>", methods=["POST"])
