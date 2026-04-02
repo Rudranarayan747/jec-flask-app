@@ -271,33 +271,39 @@ def delete_student(reg):
         return redirect(url_for("admin_dashboard"))
 
     return render_template("delete_student.html", student=student)
-
-# ---------------- Attendance Dashboard ----------------
-@app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
+    @app.route("/admin/attendance_dashboard", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
 
-    students = Student.query.filter(Student.role == "student").all()
+    selected_branch = request.form.get("branch")
 
-    if request.method == "POST":
+    # Filter students by branch
+    if selected_branch:
+        students = Student.query.filter_by(role="student", branch=selected_branch).all()
+    else:
+        students = []
+
+    # ---------------- SUBMIT ATTENDANCE ----------------
+    if request.method == "POST" and request.form.get("date"):
         date_str = request.form.get("date")
         chosen_date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
         for student in students:
-            status = request.form.get(f"status_{student.id}")
-            if status:
-                # ✅ Assign subjects based on branch
-                if student.branch.lower() == "cse":
-                    subjects = ["Math", "ETW", "BME", "Chem", "BEE", "EM"]
-                elif student.branch.lower() in ["mechanical", "civil", "electrical"]:
-                    subjects = ["PCDS", "Math", "UHV", "BEE", "Phy", "BCE"]
-                else:
-                    subjects = ["General"]
 
-                # Create attendance records for each subject
-                for subj in subjects:
+            # Assign subjects based on branch
+            if student.branch.lower() == "cse":
+                subjects = ["Math", "ETW", "BME", "Chem", "BEE", "EM"]
+            elif student.branch.lower() in ["mechanical", "civil", "electrical"]:
+                subjects = ["PCDS", "Math", "UHV", "BEE", "Phy", "BCE"]
+            else:
+                subjects = ["General"]
+
+            for subj in subjects:
+                status = request.form.get(f"status_{student.id}_{subj}")
+
+                if status:
                     record = Attendance(
                         student_id=student.id,
                         status=status,
@@ -307,11 +313,12 @@ def attendance_dashboard():
                     db.session.add(record)
 
         db.session.commit()
-        flash(f"Attendance submitted for {chosen_date.strftime('%d-%m-%Y')}!", "success")
+        flash(f"Attendance submitted for {chosen_date.strftime('%d-%m-%Y')}", "success")
         return redirect(url_for("attendance_dashboard"))
 
-    # Summary: subject‑wise percentages
+    # ---------------- SUBJECT-WISE SUMMARY ----------------
     summary = []
+
     for s in students:
         if s.branch.lower() == "cse":
             subjects = ["Math", "ETW", "BME", "Chem", "BEE", "EM"]
@@ -321,12 +328,48 @@ def attendance_dashboard():
             subjects = ["General"]
 
         for subj in subjects:
-            percent = calculate_attendance_percentage(s.id)  # you can extend this to filter by subject
+            records = Attendance.query.filter_by(student_id=s.id, subject=subj).all()
+
+            total = len(records)
+            present = sum(1 for r in records if r.status.lower() == "present")
+
+            percent = (present / total * 100) if total > 0 else 0
             eligible = "Eligible" if percent >= 60 else "Not Eligible"
-            summary.append({"student": s, "subject": subj, "percent": percent, "eligible": eligible})
 
-    return render_template("attendance_dashboard.html", students=students, summary=summary)
+            summary.append({
+                "student": s,
+                "subject": subj,
+                "percent": percent,
+                "eligible": eligible,
+                "total_classes": total,
+                "present_classes": present
+            })
 
+    # ---------------- OVERALL SUMMARY ----------------
+    overall_summary = []
+
+    for s in students:
+        records = Attendance.query.filter_by(student_id=s.id).all()
+
+        total = len(records)
+        present = sum(1 for r in records if r.status.lower() == "present")
+
+        percent = (present / total * 100) if total > 0 else 0
+        eligible = "Eligible" if percent >= 60 else "Not Eligible"
+
+        overall_summary.append({
+            "student": s,
+            "percent": percent,
+            "eligible": eligible
+        })
+
+    return render_template(
+        "attendance_dashboard.html",
+        students=students,
+        selected_branch=selected_branch,
+        summary=summary,
+        overall_summary=overall_summary
+    )
 # ---------------- Search Attendance ----------------
 @app.route("/admin/search_attendance", methods=["GET", "POST"])
 @login_required
