@@ -30,19 +30,18 @@ class Student(UserMixin, db.Model):
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
     result = db.Column(db.String(50))
-    subject = db.Column(db.String(100))
     attendance_records = db.relationship("Attendance", backref="student", lazy=True)
 
 class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    date_posted = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.String(50), db.ForeignKey("student.id"))
-    date = db.Column(db.Date, default=db.func.current_date())
+    date = db.Column(db.Date, default=datetime.utcnow)
     status = db.Column(db.String(10))
     subject = db.Column(db.String(100))
     period = db.Column(db.String(50))
@@ -51,7 +50,7 @@ class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(200), nullable=False)
     filepath = db.Column(db.String(300), nullable=False)
-    uploaded_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -85,8 +84,8 @@ def home():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        reg = request.form["username"]
-        password = request.form["password"]
+        reg = request.form["username"].strip()
+        password = request.form["password"].strip()
         user = Student.query.get(reg)
         if user and user.password == password:
             login_user(user)
@@ -104,23 +103,29 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        reg = request.form["reg"]
-        name = request.form["name"]
-        branch = request.form["branch"]
-        password = request.form["password"]
+        reg = request.form["reg"].strip()
+        name = request.form["name"].strip()
+        branch = request.form["branch"].strip()
+        password = request.form["password"].strip()
+
+        if not reg or not name or not branch or not password:
+            flash("All fields are required", "danger")
+            return render_template("register.html")
 
         if Student.query.get(reg):
             flash("Registration number already exists", "danger")
             return render_template("register.html")
 
-        new_student = Student(
-            id=reg, name=name, branch=branch, password=password,
-            role="student", result="Not Available"
-        )
-        db.session.add(new_student)
-        db.session.commit()
-        flash("Registration successful! Please login.", "success")
-        return redirect(url_for("login"))
+        try:
+            new_student = Student(id=reg, name=name, branch=branch, password=password, role="student", result="Not Available")
+            db.session.add(new_student)
+            db.session.commit()
+            flash("Registration successful! Please login.", "success")
+            return redirect(url_for("login"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error adding student: {str(e)}", "danger")
+            return render_template("register.html")
     return render_template("register.html")
 
 # ---------------- Student Dashboard ----------------
@@ -133,33 +138,11 @@ def student_dashboard():
     student = Student.query.get(current_user.id)
     attendance_records = Attendance.query.filter_by(student_id=student.id).all()
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
-
     percent = calculate_attendance_percentage(student.id)
     eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-
-    return render_template(
-        "student.html",
-        student=student,
-        notices=notices,
-        attendance=attendance_records,
-        files=files,
-        percent=percent,
-        eligible=eligible
-    )
-
-# ---------------- Timetable-wise Attendance ----------------
-@app.route("/student/timetable_attendance")
-@login_required
-def timetable_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-    student = Student.query.get(current_user.id)
-    records = Attendance.query.filter_by(student_id=student.id).order_by(Attendance.date, Attendance.period).all()
-    timetable = {}
-    for r in records:
-        date_str = r.date.strftime("%Y-%m-%d")
-        timetable.setdefault(date_str, []).append(r)
-    return render_template("timetable_attendance.html", student=student, timetable=timetable)
+    return render_template("student.html", student=student, notices=notices,
+                           attendance=attendance_records, files=files, percent=percent,
+                           eligible=eligible)
 
 # ---------------- Admin Dashboard ----------------
 @app.route("/admin")
@@ -168,7 +151,7 @@ def admin_dashboard():
     if current_user.role != "admin":
         return "Access denied"
     notices = Notice.query.order_by(Notice.date_posted.desc()).all()
-    students = Student.query.filter(Student.role == "student").all()
+    students = Student.query.filter_by(role="student").all()
     files = UploadedFile.query.order_by(UploadedFile.uploaded_at.desc()).all()
     student_data = []
     for s in students:
@@ -184,75 +167,53 @@ def add_notice():
     if current_user.role != "admin":
         return "Access denied"
     if request.method == "POST":
-        title = request.form["title"]
-        content = request.form["content"]
-        notice = Notice(title=title, content=content)
-        db.session.add(notice)
-        db.session.commit()
-        flash("Notice added successfully", "success")
-        return redirect(url_for("admin_dashboard"))
+        title = request.form["title"].strip()
+        content = request.form["content"].strip()
+        if title and content:
+            notice = Notice(title=title, content=content)
+            db.session.add(notice)
+            db.session.commit()
+            flash("Notice added successfully", "success")
+            return redirect(url_for("admin_dashboard"))
+        flash("All fields are required", "danger")
     return render_template("add_notice.html")
 
-# ---------------- Update Student ----------------
-@app.route("/admin/update_student/<reg>", methods=["POST"])
-@login_required
-def update_student(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if student:
-        student.branch = request.form["branch"]
-        student.result = request.form["result"]
-        db.session.commit()
-        flash("Student updated successfully", "success")
-    return redirect(url_for("admin_dashboard"))
-
-# ---------------- Delete Student ----------------
-@app.route("/admin/delete_student/<reg>")
-@login_required
-def delete_student(reg):
-    if current_user.role != "admin":
-        return "Access denied"
-    student = Student.query.get(reg)
-    if student:
-        db.session.delete(student)
-        db.session.commit()
-        flash("Student deleted successfully", "success")
-    return redirect(url_for("admin_dashboard"))
-
-# ---------------- Upload PDF ----------------
-@app.route("/admin/upload_pdf", methods=["POST"])
-@login_required
-def upload_pdf():
-    if current_user.role != "admin":
-        return "Access denied"
-    file = request.files.get("pdf")
-    if file:
-        filename = file.filename
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(filepath)
-        uploaded = UploadedFile(filename=filename, filepath=filepath)
-        db.session.add(uploaded)
-        db.session.commit()
-        flash("PDF uploaded successfully", "success")
-    return redirect(url_for("admin_dashboard"))
-
 # ---------------- Attendance Dashboard ----------------
-@app.route("/admin/attendance_dashboard")
+@app.route("/admin/attendance", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
-    students = Student.query.filter(Student.role == "student").all()
-    return render_template("attendance_dashboard.html", students=students)
+    selected_branch = ""
+    students = []
+    overall_summary = []
+    if request.method == "POST":
+        selected_branch = request.form.get("branch", "")
+        date_str = request.form.get("date")
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else datetime.today().date()
+        students = Student.query.filter_by(branch=selected_branch).all()
+        # Insert attendance if form contains attendance statuses
+        for s in students:
+            for key in request.form:
+                if key.startswith(f"status_{s.id}_"):
+                    subj = key.split("_", 2)[2]
+                    status_val = request.form.get(key)
+                    existing = Attendance.query.filter_by(student_id=s.id, date=date_obj, subject=subj).first()
+                    if existing:
+                        existing.status = status_val
+                    else:
+                        db.session.add(Attendance(student_id=s.id, date=date_obj, subject=subj, status=status_val, period=subj))
+        db.session.commit()
 
-# ---------------- Search Attendance ----------------
-@app.route("/admin/search_attendance")
-@login_required
-def search_attendance():
-    if current_user.role != "admin":
-        return "Access denied"
-    return render_template("search_attendance.html")  # create this template
+    # Overall summary
+    all_students = Student.query.filter_by(role="student").all()
+    for s in all_students:
+        percent = calculate_attendance_percentage(s.id)
+        eligible = "Eligible" if percent >= 60 else "Not Eligible"
+        overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
+
+    return render_template("attendance_dashboard.html", students=students, selected_branch=selected_branch,
+                           overall_summary=overall_summary)
 
 # ---------------- Initialize DB ----------------
 with app.app_context():
