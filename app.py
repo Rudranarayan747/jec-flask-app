@@ -149,57 +149,69 @@ def admin_dashboard():
 def attendance_dashboard():
     if current_user.role != "admin":
         return "Access denied"
-    students = []
+
     selected_branch = ""
     selected_date = datetime.today().strftime("%Y-%m-%d")
+    students = []
     overall_summary = []
 
     if request.method == "POST":
-        selected_branch = request.form.get("branch")
-        selected_date = request.form.get("date")
-        students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
+        selected_branch = request.form.get("branch", "").strip()
+        selected_date = request.form.get("date", datetime.today().strftime("%Y-%m-%d"))
+        try:
+            datetime.strptime(selected_date, "%Y-%m-%d")  # validate date
+        except ValueError:
+            flash("Invalid date format", "danger")
+            return redirect(url_for("attendance_dashboard"))
 
-        # Build overall summary
+        if selected_branch:
+            students = Student.query.filter_by(branch=selected_branch).order_by(Student.id).all()
+
         for s in students:
             percent = calculate_attendance_percentage(s.id)
             eligible = "Eligible" if percent >= 60 else "Not Eligible"
             overall_summary.append({"student": s, "percent": percent, "eligible": eligible})
 
-    return render_template("attendance.html", students=students, selected_branch=selected_branch,
-                           selected_date=selected_date, overall_summary=overall_summary)
-
-# ---------------- Submit Attendance ----------------
+    return render_template("attendance.html",
+                           students=students,
+                           selected_branch=selected_branch,
+                           selected_date=selected_date,
+                           overall_summary=overall_summary)
 @app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
 def submit_attendance():
     if current_user.role != "admin":
         return "Access denied"
 
-    date = request.form.get("date")
-    branch = request.form.get("branch")
+    date_str = request.form.get("date")
+    branch = request.form.get("branch", "").strip()
+    if not branch:
+        flash("Branch is required", "danger")
+        return redirect(url_for("attendance_dashboard"))
+
+    try:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        flash("Invalid date format", "danger")
+        return redirect(url_for("attendance_dashboard"))
+
     students = Student.query.filter_by(branch=branch).all()
 
     for s in students:
-        # Determine subjects
-        if s.branch.lower() == "cse":
-            subjects = ['Math','ETW','BME','Chem','BEE','EM']
-        else:
-            subjects = ['PCDS','Math','UHV','BEE','Phy','BCE']
+        subjects = ['Math','ETW','BME','Chem','BEE','EM'] if s.branch.lower() == 'cse' else ['PCDS','Math','UHV','BEE','Phy','BCE']
 
         for subj in subjects:
             status = request.form.get(f"status_{s.id}_{subj}")
             if status:
-                # Check if attendance already exists
-                existing = Attendance.query.filter_by(student_id=s.id, date=date, subject=subj).first()
+                existing = Attendance.query.filter_by(student_id=s.id, date=date_obj, subject=subj).first()
                 if existing:
                     existing.status = status
                 else:
-                    att = Attendance(student_id=s.id, date=date, subject=subj, period=subj, status=status)
+                    att = Attendance(student_id=s.id, date=date_obj, subject=subj, period=subj, status=status)
                     db.session.add(att)
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
-
 # ---------------- Add Notice ----------------
 @app.route("/admin/add_notice", methods=["GET", "POST"])
 @login_required
