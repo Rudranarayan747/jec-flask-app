@@ -6,109 +6,114 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        h1, h2 { text-align: center; }
+        h1, h2 { text-align: center; margin-bottom: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #007BFF; color: #fff; }
         tr:nth-child(even) { background-color: #e9f0ff; }
-        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
         a { text-decoration: none; color: #007BFF; }
         a:hover { text-decoration: underline; }
-        form.inline { display: inline-block; }
-        button { padding: 5px 10px; margin: 5px; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 4px; box-sizing: border-box; }
-        input[type="file"] { margin-right: 10px; }
+        .section { margin-bottom: 40px; }
+        .btn { padding: 5px 10px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-add { background-color: #28a745; color: white; }
+        .btn-upload { background-color: #17a2b8; color: white; }
+        .btn-attendance { background-color: #ffc107; color: white; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Admin Dashboard</h1>
-    <nav style="text-align:center; margin-bottom: 20px;">
-        <a href="{{ url_for('home') }}">← Back to Home</a> |
-        <a href="{{ url_for('attendance_dashboard') }}">Manage Attendance</a> |
-        <a href="{{ url_for('add_notice') }}">Add Notice</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
 
     <!-- Notices -->
-    <h2>Notices</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Date Posted</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for notice in notices %}
-            <tr>
-                <td>{{ notice.title }}</td>
-                <td>{{ notice.content }}</td>
-                <td>{{ notice.date_posted.strftime('%Y-%m-%d %H:%M') }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="section">
+        <h2>Notices</h2>
+        <a class="btn btn-add" href="{{ url_for('add_notice') }}">Add Notice</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Date Posted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notice in notices %}
+                <tr>
+                    <td>{{ notice.title }}</td>
+                    <td>{{ notice.content }}</td>
+                    <td>{{ notice.date_posted.strftime("%Y-%m-%d %H:%M") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <!-- Students Attendance and Update -->
-    <h2>Students Attendance & Info</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Reg No</th>
-                <th>Name</th>
-                <th>Branch</th>
-                <th>Password</th>
-                <th>Result</th>
-                <th>Attendance %</th>
-                <th>Eligibility</th>
-                <th>Update</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in students %}
-            <tr>
-                <form action="{{ url_for('update_student', student_id=record.student.id) }}" method="POST" class="inline">
-                <td>{{ record.student.id }}</td>
-                <td><input type="text" name="name" value="{{ record.student.name }}"></td>
-                <td><input type="text" name="branch" value="{{ record.student.branch }}"></td>
-                <td><input type="password" name="password" value="{{ record.student.password }}"></td>
-                <td><input type="text" name="result" value="{{ record.student.result }}"></td>
-                <td>{{ "%.2f"|format(record.percent) }}%</td>
-                <td>{{ record.eligible }}</td>
-                <td><button type="submit">Update</button></td>
-                </form>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Upload PDF -->
-    <h2>Upload PDF</h2>
-    <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" style="text-align:center; margin-bottom:20px;">
-        <input type="file" name="pdf" accept="application/pdf" required>
-        <button type="submit">Upload PDF</button>
-    </form>
+    <!-- Student List -->
+    <div class="section">
+        <h2>Students</h2>
+        <a class="btn btn-attendance" href="{{ url_for('attendance_dashboard') }}">Mark Attendance</a>
+        <a class="btn btn-attendance" href="{{ url_for('search_attendance') }}">Search Attendance</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>Attendance %</th>
+                    <th>Eligibility</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{ s.student.id }}</td>
+                    <td>{{ s.student.name }}</td>
+                    <td>{{ s.student.branch }}</td>
+                    <td>{{ "%.2f"|format(s.percent) }}%</td>
+                    <td>{{ s.eligible }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('update_student', student_id=s.student.id) }}">
+                            <input type="text" name="name" value="{{ s.student.name }}" required style="width:100px;">
+                            <input type="text" name="branch" value="{{ s.student.branch }}" required style="width:80px;">
+                            <input type="text" name="password" value="{{ s.student.password }}" required style="width:80px;">
+                            <input type="text" name="result" value="{{ s.student.result }}" style="width:80px;">
+                            <button type="submit" class="btn btn-add">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Uploaded Files -->
-    <h2>Uploaded Files</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Filename</th>
-                <th>Uploaded At</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for f in files %}
-            <tr>
-                <td><a href="{{ url_for('static', filename='uploads/' ~ f.filename) }}" target="_blank">{{ f.filename }}</a></td>
-                <td>{{ f.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="section">
+        <h2>Uploaded Files</h2>
+        <form method="POST" action="{{ url_for('upload_pdf') }}" enctype="multipart/form-data">
+            <input type="file" name="pdf" required>
+            <button type="submit" class="btn btn-upload">Upload PDF</button>
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Uploaded At</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>{{ file.filename }}</td>
+                    <td>{{ file.uploaded_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td><a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">Download</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
-</html>s
+</html>
