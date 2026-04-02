@@ -43,7 +43,7 @@ class Attendance(db.Model):
     date = db.Column(db.Date, default=db.func.current_date())
     status = db.Column(db.String(10))
     subject = db.Column(db.String(100))
-    period = db.Column(db.String(50))  # Timetable period/slot
+    period = db.Column(db.String(50))
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,7 +54,7 @@ class UploadedFile(db.Model):
 class Timetable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     branch = db.Column(db.String(50))
-    day = db.Column(db.String(20))  # Monday, Tuesday, etc.
+    day = db.Column(db.String(20))
     period = db.Column(db.Integer)
     subject = db.Column(db.String(100))
 
@@ -76,7 +76,6 @@ def calculate_attendance_percentage(student_id):
 def home():
     return render_template("index.html")
 
-# ---------------- Login & Logout ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -95,7 +94,6 @@ def logout():
     logout_user()
     return redirect(url_for("home"))
 
-# ---------------- Registration ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -108,10 +106,8 @@ def register():
             flash("Registration number already exists", "danger")
             return render_template("register.html")
 
-        new_student = Student(
-            id=reg, name=name, branch=branch, password=password,
-            role="student", result="Not Available"
-        )
+        new_student = Student(id=reg, name=name, branch=branch, password=password,
+                              role="student", result="Not Available")
         db.session.add(new_student)
         db.session.commit()
         flash("Registration successful! Please login.", "success")
@@ -148,7 +144,7 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
-# ---------------- Admin Attendance Dashboard ----------------
+# ---------------- Attendance Dashboard ----------------
 @app.route("/admin/attendance", methods=["GET", "POST"])
 @login_required
 def attendance_dashboard():
@@ -217,12 +213,11 @@ def submit_attendance():
                 else:
                     att = Attendance(student_id=s.id, date=date_obj, subject=p.subject, period=p.subject, status=status)
                     db.session.add(att)
-
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
 
-# ---------------- Search/View Attendance ----------------
+# ---------------- Search Attendance ----------------
 @app.route("/admin/search_attendance", methods=["GET", "POST"])
 @login_required
 def search_attendance():
@@ -237,7 +232,6 @@ def search_attendance():
         student_id = request.form.get("student_id")
         date_str = request.form.get("date", "")
         selected_student = Student.query.get(student_id)
-
         if date_str:
             try:
                 date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -285,9 +279,14 @@ def upload_pdf():
     if file.filename == "":
         flash("No file selected", "danger")
         return redirect(url_for("admin_dashboard"))
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+
+    # Save in static/uploads
+    upload_static_dir = os.path.join(app.root_path, "static", "uploads")
+    os.makedirs(upload_static_dir, exist_ok=True)
+    filepath = os.path.join(upload_static_dir, file.filename)
     file.save(filepath)
-    uploaded = UploadedFile(filename=file.filename, filepath=filepath)
+
+    uploaded = UploadedFile(filename=file.filename, filepath=f"uploads/{file.filename}")
     db.session.add(uploaded)
     db.session.commit()
     flash("PDF uploaded successfully", "success")
@@ -302,6 +301,5 @@ with app.app_context():
         db.session.add(Notice(title="Welcome Notice", content="Welcome to the Attendance Management System."))
     db.session.commit()
 
-# ---------------- Run App ----------------
 if __name__ == "__main__":
     app.run(debug=True)
