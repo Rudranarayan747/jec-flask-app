@@ -3,102 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Attendance Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        h1, h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #007BFF; color: #fff; }
-        tr:nth-child(even) { background-color: #e9f0ff; }
-        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
-        select, input[type="date"], button { padding: 5px 10px; margin: 5px; }
-        a { text-decoration: none; color: #007BFF; }
-        a:hover { text-decoration: underline; }
-    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Admin - Attendance Dashboard</h1>
-    <a href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <h2>Attendance Dashboard</h2>
+    <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
 
     <form method="POST">
-        <label for="branch">Select Branch:</label>
-        <select name="branch" id="branch" required>
-            <option value="">--Select Branch--</option>
-            <option value="CSE" {% if selected_branch == 'CSE' %}selected{% endif %}>CSE</option>
-            <option value="Mechanical" {% if selected_branch == 'Mechanical' %}selected{% endif %}>Mechanical</option>
-            <option value="Civil" {% if selected_branch == 'Civil' %}selected{% endif %}>Civil</option>
-            <option value="Electrical" {% if selected_branch == 'Electrical' %}selected{% endif %}>Electrical</option>
-        </select>
-
-        <label for="date">Select Date:</label>
-        <input type="date" name="date" id="date" value="{{ selected_date }}" required>
-
-        <button type="submit">Load Students</button>
+        Branch: <input type="text" name="branch" value="{{ selected_branch }}" required>
+        Date: <input type="date" name="date" value="{{ selected_date }}" required>
+        <button type="submit">Select</button>
     </form>
 
     {% if students %}
     <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
-
-        {% for student in students %}
-            <h3>{{ student.name }} ({{ student.id }}) - {{ student.branch }}</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Period</th>
-                        <th>Subject</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for slot in timetable %}
-                    <tr>
-                        <td>{{ slot.period }}</td>
-                        <td>{{ slot.subject }}</td>
-                        <td>
-                            <select name="status_{{ student.id }}_{{ slot.subject }}">
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                            </select>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endfor %}
-
+        <table border="1">
+            <tr>
+                <th>Student</th>
+                {% for p in timetable %}
+                    <th>{{ p.subject }}</th>
+                {% endfor %}
+            </tr>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.name }}</td>
+                {% for p in timetable %}
+                    <td>
+                        <select name="status_{{ s.id }}_{{ p.subject }}">
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
         <button type="submit">Submit Attendance</button>
     </form>
     {% endif %}
-
-    {% if overall_summary %}
-    <h2>Overall Attendance Summary</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Reg No</th>
-                <th>Name</th>
-                <th>Branch</th>
-                <th>Attendance %</th>
-                <th>Eligibility</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in overall_summary %}
-            <tr>
-                <td>{{ record.student.id }}</td>
-                <td>{{ record.student.name }}</td>
-                <td>{{ record.student.branch }}</td>
-                <td>{{ "%.2f"|format(record.percent) }}%</td>
-                <td>{{ record.eligible }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-</div>
 </body>
 </html>
