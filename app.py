@@ -26,11 +26,11 @@ class Student(UserMixin, db.Model):
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.String(100))
     branch = db.Column(db.String(100))
+    section = db.Column(db.String(10))  # NEW
     password = db.Column(db.String(100))
     role = db.Column(db.String(20), default="student")
     result = db.Column(db.String(50))
     attendance_records = db.relationship("Attendance", backref="student", lazy=True)
-
 class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
