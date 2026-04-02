@@ -258,6 +258,7 @@ def submit_attendance():
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
 
+
     # ---------------- Update Student ----------------
 @app.route("/admin/update_student/<student_id>", methods=["POST"])
 @login_required
