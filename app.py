@@ -193,7 +193,8 @@ def attendance_dashboard():
                            overall_summary=overall_summary,
                            section_data=section_data,
                            timetable=timetable)
-   @app.route("/admin/submit_attendance", methods=["POST"])
+  # ---------------- Submit Attendance ----------------
+@app.route("/admin/submit_attendance", methods=["POST"])
 @login_required
 def submit_attendance():
     if current_user.role != "admin":
@@ -238,6 +239,7 @@ def submit_attendance():
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
     return redirect(url_for("attendance_dashboard"))
+
 
 # ---------------- Search Attendance ----------------
 @app.route("/admin/search_attendance", methods=["GET", "POST"])
