@@ -61,8 +61,10 @@ def load_user(user_id):
 def calculate_attendance_percentage(student_id, month=None, year=None, semester=None):
     query = Attendance.query.filter_by(student_id=student_id)
     if month and year:
-        query = query.filter(extract("month", Attendance.date) == month,
-                             extract("year", Attendance.date) == year)
+        query = query.filter(
+            extract("month", Attendance.date) == month,
+            extract("year", Attendance.date) == year
+        )
     if semester == "Jan-Jun":
         query = query.filter(extract("month", Attendance.date).between(1, 6))
     elif semester == "Jul-Dec":
@@ -111,8 +113,10 @@ def register():
             flash("Registration number already exists", "danger")
             return render_template("register.html")
 
-        new_student = Student(id=reg, name=name, branch=branch, password=password,
-                              role="student", result="Not Available")
+        new_student = Student(
+            id=reg, name=name, branch=branch, password=password,
+            role="student", result="Not Available"
+        )
         db.session.add(new_student)
         db.session.commit()
         flash("Registration successful! Please login.", "success")
@@ -133,9 +137,15 @@ def student_dashboard():
     percent = calculate_attendance_percentage(student.id)
     eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
 
-    return render_template("student.html", student=student, notices=notices,
-                           attendance=attendance_records, files=files,
-                           percent=percent, eligible=eligible)
+    return render_template(
+        "student.html",
+        student=student,
+        notices=notices,
+        attendance=attendance_records,
+        files=files,
+        percent=percent,
+        eligible=eligible
+    )
 
 # ---------------- Timetable-wise Attendance ----------------
 @app.route("/student/timetable_attendance")
@@ -148,9 +158,7 @@ def timetable_attendance():
     timetable = {}
     for r in records:
         date_str = r.date.strftime("%Y-%m-%d")
-        if date_str not in timetable:
-            timetable[date_str] = []
-        timetable[date_str].append(r)
+        timetable.setdefault(date_str, []).append(r)
     return render_template("timetable_attendance.html", student=student, timetable=timetable)
 
 # ---------------- Admin Dashboard ----------------
@@ -168,6 +176,22 @@ def admin_dashboard():
         eligible = "Eligible" if percent >= 60 else "Not Eligible"
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
+
+# ---------------- Add Notice Route ----------------
+@app.route("/admin/add_notice", methods=["GET", "POST"])
+@login_required
+def add_notice():
+    if current_user.role != "admin":
+        return "Access denied"
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+        notice = Notice(title=title, content=content)
+        db.session.add(notice)
+        db.session.commit()
+        flash("Notice added successfully", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("add_notice.html")
 
 # ---------------- Initialize DB ----------------
 with app.app_context():
