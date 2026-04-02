@@ -81,7 +81,29 @@
             <tr><td>02:50–04:30</td><td colspan="6">Labs (PHY / PCDS / BEE / etc.)</td></tr>
         </table>
     {% endif %}
-    <!-- Student Attendance -->
+    <!-- Subject-wise Attendance Summary -->
+<h2>Subject-wise Attendance Summary</h2>
+<table>
+    <tr>
+        <th>Period</th>
+        <th>Subject</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Off</th>
+    </tr>
+    {% for sub in subject_summary %}
+    <tr>
+        <td>{{ sub.period }}</td>
+        <td>{{ sub.subject }}</td>
+        <td>{{ sub.present }}</td>
+        <td>{{ sub.absent }}</td>
+        <td>{{ sub.off }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No attendance data available.</td></tr>
+    {% endfor %}
+</table>
+<!-- Student Attendance -->
 <h2>Student Attendance - Section {{ selected_section }}</h2>
 <form method="POST" action="{{ url_for('submit_attendance') }}">
     <input type="hidden" name="branch" value="{{ selected_branch }}">
