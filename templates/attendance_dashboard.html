@@ -11,8 +11,6 @@
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #007BFF; color: #fff; }
         tr:nth-child(even) { background-color: #e9f0ff; }
-        .present { color: green; font-weight: bold; }
-        .absent { color: red; font-weight: bold; }
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
         select, input[type="date"], button { padding: 5px 10px; margin: 5px; }
         a { text-decoration: none; color: #007BFF; }
@@ -26,7 +24,7 @@
 
     <form method="POST">
         <label for="branch">Select Branch:</label>
-        <select name="branch" id="branch">
+        <select name="branch" id="branch" required>
             <option value="">--Select Branch--</option>
             <option value="CSE" {% if selected_branch == 'CSE' %}selected{% endif %}>CSE</option>
             <option value="Mechanical" {% if selected_branch == 'Mechanical' %}selected{% endif %}>Mechanical</option>
@@ -35,15 +33,15 @@
         </select>
 
         <label for="date">Select Date:</label>
-        <input type="date" name="date" id="date" required>
+        <input type="date" name="date" id="date" value="{{ selected_date }}" required>
 
         <button type="submit">Load Students</button>
     </form>
 
     {% if students %}
-    <form method="POST">
+    <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
-        <input type="hidden" name="date" value="{{ request.form.get('date') }}">
+        <input type="hidden" name="date" value="{{ selected_date }}">
 
         {% for student in students %}
             <h3>{{ student.name }} ({{ student.id }}) - {{ student.branch }}</h3>
