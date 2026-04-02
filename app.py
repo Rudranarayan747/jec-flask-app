@@ -522,7 +522,7 @@ def add_notice():
         flash("Notice added successfully!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("add_notice.html")
-    # ---------------- Initialize ----------------
+# ---------------- Initialize ----------------
 with app.app_context():
     db.create_all()
     if not Student.query.get("admin"):
@@ -538,7 +538,6 @@ with app.app_context():
             content="Internal 1 for 2nd Semester will be held from 24th March to 26th March."
         ))
     db.session.commit()
-
 # ---------------- Run ----------------
 if __name__ == "__main__":
     app.run(debug=True)
