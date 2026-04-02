@@ -3,65 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Attendance</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        h1, h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #28a745; color: #fff; }
-        tr:nth-child(even) { background-color: #e9f8f0; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
-        select, input[type="date"], button { padding: 5px 10px; margin: 5px; }
-        a { text-decoration: none; color: #007BFF; }
-        a:hover { text-decoration: underline; }
-    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Search/View Attendance</h1>
-    <a href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <h2>Search Attendance</h2>
+    <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
 
     <form method="POST">
-        <label for="student_id">Select Student:</label>
-        <select name="student_id" id="student_id" required>
-            <option value="">--Select Student--</option>
+        Student: 
+        <select name="student_id" required>
             {% for s in students %}
-            <option value="{{ s.id }}" {% if selected_student and selected_student.id == s.id %}selected{% endif %}>
-                {{ s.name }} ({{ s.id }})
-            </option>
+                <option value="{{ s.id }}" {% if selected_student and s.id==selected_student.id %}selected{% endif %}>{{ s.name }} ({{ s.id }})</option>
             {% endfor %}
         </select>
-
-        <label for="date">Select Date (optional):</label>
-        <input type="date" name="date" id="date" value="{{ selected_date }}">
-
+        Date: <input type="date" name="date" value="{{ selected_date }}">
         <button type="submit">Search</button>
     </form>
 
     {% if records %}
-    <h2>Attendance Records</h2>
-    <table>
-        <thead>
+        <h3>Attendance Records:</h3>
+        <table border="1">
             <tr>
                 <th>Date</th>
-                <th>Period</th>
                 <th>Subject</th>
                 <th>Status</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for rec in records %}
+            {% for r in records %}
             <tr>
-                <td>{{ rec.date.strftime("%Y-%m-%d") }}</td>
-                <td>{{ rec.period }}</td>
-                <td>{{ rec.subject }}</td>
-                <td>{{ rec.status }}</td>
+                <td>{{ r.date.strftime("%Y-%m-%d") }}</td>
+                <td>{{ r.subject }}</td>
+                <td>{{ r.status }}</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+        </table>
     {% endif %}
-</div>
 </body>
 </html>
