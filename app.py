@@ -217,24 +217,24 @@ def submit_attendance():
     day_name = date_obj.strftime("%A")
     timetable = Timetable.query.filter_by(branch=branch, section=section, day=day_name).all()
 
-    for s in students:
-        for p in timetable:
-            status = request.form.get(f"status_{s.id}_{p.subject}")
-            if status in ["Present", "Absent", "Off"]:
-                existing = Attendance.query.filter_by(
-                    student_id=s.id, date=date_obj, subject=p.subject
-                ).first()
-                if existing:
-                    existing.status = status
-                else:
-                    att = Attendance(
-                        student_id=s.id,
-                        date=date_obj,
-                        subject=p.subject,
-                        period=p.period,
-                        status=status
-                    )
-                    db.session.add(att)
+  for s in students:
+    for p in timetable:
+        status = request.form.get(f"status_{s.id}_{p.id}")
+        if status in ["Present", "Absent", "Off"]:
+            existing = Attendance.query.filter_by(
+                student_id=s.id, date=date_obj, subject=p.subject
+            ).first()
+            if existing:
+                existing.status = status
+            else:
+                att = Attendance(
+                    student_id=s.id,
+                    date=date_obj,
+                    subject=p.subject,
+                    period=p.period,
+                    status=status
+                )
+                db.session.add(att)
 
     db.session.commit()
     flash("Attendance recorded successfully!", "success")
