@@ -5,51 +5,49 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
-        <h1>Student Dashboard</h1>
-    </header>
+<header>
+    <img src="{{ url_for('static', filename='jec_logo.png') }}" alt="JEC Logo">
+    <h1>Student Dashboard</h1>
+</header>
 
-    <h2>Welcome, {{ student.name }}</h2>
-    <p><strong>Registration No:</strong> {{ student.id }}</p>
-    <p><strong>Branch:</strong> {{ student.branch }}</p>
-    <p><strong>Your Result:</strong> {{ student.result }}</p>
+<h2>Welcome, {{ student.name }}</h2>
+<p><strong>Registration No:</strong> {{ student.id }}</p>
+<p><strong>Branch:</strong> {{ student.branch }}</p>
+<p><strong>Your Result:</strong> {{ student.result }}</p>
 
-    <h3>Attendance</h3>
-    <p><strong>Overall Attendance:</strong> {{ percent|round(2) }}%</p>
-    <p><strong>Status:</strong> {{ eligible }}</p>
-    <p>
-        <!-- ✅ Updated route names -->
-        <a href="{{ url_for('student_monthly_attendance') }}">View Monthly Attendance</a> | 
-        <a href="{{ url_for('student_semester_attendance') }}">View Semester Attendance</a>
-    </p>
+<h3>Attendance</h3>
+<p><strong>Overall Attendance:</strong> {{ percent|round(2) }}%</p>
+<p><strong>Status:</strong> {{ eligible }}</p>
+<p>
+    <a href="{{ url_for('timetable_attendance') }}">View Timetable Attendance</a>
+</p>
 
-    <h3>Notices</h3>
-    <ul>
-        {% for notice in notices %}
-        <li>
-            <strong>{{ notice.title }}</strong> - 
-            {{ notice.date_posted.strftime('%Y-%m-%d') if notice.date_posted else '' }}<br>
-            {{ notice.content }}
-        </li>
-        {% else %}
-        <li>No notices yet.</li>
-        {% endfor %}
-    </ul>
+<h3>Notices</h3>
+<ul>
+    {% for notice in notices %}
+    <li>
+        <strong>{{ notice.title }}</strong> - 
+        {{ notice.date_posted.strftime('%Y-%m-%d') if notice.date_posted else '' }}<br>
+        {{ notice.content }}
+    </li>
+    {% else %}
+    <li>No notices yet.</li>
+    {% endfor %}
+</ul>
 
-    <h3>Available PDFs</h3>
-    <ul>
-        {% for file in files %}
-        <li>
-            <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
-                {{ file.filename }}
-            </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
-        </li>
-        {% else %}
-        <li>No files uploaded yet.</li>
-        {% endfor %}
-    </ul>
+<h3>Available PDFs</h3>
+<ul>
+    {% for file in files %}
+    <li>
+        <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">
+            {{ file.filename }}
+        </a> ({{ file.uploaded_at.strftime('%Y-%m-%d') if file.uploaded_at else '' }})
+    </li>
+    {% else %}
+    <li>No files uploaded yet.</li>
+    {% endfor %}
+</ul>
 
-    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+<p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 </html>
