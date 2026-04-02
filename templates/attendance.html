@@ -82,61 +82,42 @@
         </table>
     {% endif %}
     <!-- Student Attendance -->
-    <h2>Student Attendance - Section {{ selected_section }}</h2>
-    <form method="POST" action="{{ url_for('submit_attendance') }}">
-        <input type="hidden" name="branch" value="{{ selected_branch }}">
-        <input type="hidden" name="section" value="{{ selected_section }}">
-        <input type="hidden" name="date" value="{{ selected_date }}">
+<h2>Student Attendance - Section {{ selected_section }}</h2>
+<form method="POST" action="{{ url_for('submit_attendance') }}">
+    <input type="hidden" name="branch" value="{{ selected_branch }}">
+    <input type="hidden" name="section" value="{{ selected_section }}">
+    <input type="hidden" name="date" value="{{ selected_date }}">
 
-        <table>
-            <tr>
-                <th>Reg No</th>
-                <th>Name</th>
-                <th>Attendance %</th>
-                <th>Eligibility</th>
-                {% for p in timetable %}
-                <th>{{ p.subject }}</th>
-                {% endfor %}
-            </tr>
-            {% for s in students %}
-            <tr>
-                <td>{{ s.id }}</td>
-                <td>{{ s.name }}</td>
-                <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
-                <td>{{ overall_summary[loop.index0].eligible }}</td>
-                {% for p in timetable %}
-                <td>
-                    <select name="status_{{ s.id }}_{{ p.subject }}">
-                        <option value="">--</option>
-                        <option value="Present">Present</option>
-                        <option value="Absent">Absent</option>
-                        <option value="Absent">Off</option>
-                    </select>
-                </td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </table>
-        <button type="submit">Submit Attendance</button>
-    </form>
-
-    <!-- Section Summary -->
-    <h2>Section-wise Attendance Summary</h2>
     <table>
         <tr>
-            <th>Section</th>
-            <th>Average Attendance %</th>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Attendance %</th>
+            <th>Eligibility</th>
+            {% for p in timetable %}
+            <th>{{ p.subject }}</th>
+            {% endfor %}
         </tr>
-        {% for sec in section_data %}
+        {% for s in students %}
         <tr>
-            <td>{{ sec.section }}</td>
-            <td>{{ sec.average|round(2) }}%</td>
+            <td>{{ s.id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
+            <td>{{ overall_summary[loop.index0].eligible }}</td>
+            {% for p in timetable %}
+            <td>
+                <select name="status_{{ s.id }}_{{ p.id }}">
+                    <option value="">--</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Off">Off</option>
+                </select>
+            </td>
+            {% endfor %}
         </tr>
-        {% else %}
-        <tr><td colspan="2">No section data available.</td></tr>
         {% endfor %}
     </table>
+    <button type="submit">Submit Attendance</button>
+</form>
 
-    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
-</body>
-</html>
+    
