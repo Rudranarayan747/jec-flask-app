@@ -3,25 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Attendance</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        h2, h3 { text-align: center; margin-bottom: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; }
+        form { text-align: center; margin-bottom: 20px; }
+        select, input[type="date"], button { padding: 6px; margin: 5px; }
+        button { background-color: #007BFF; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #007BFF; color: #fff; }
+        tr:nth-child(even) { background-color: #e9f0ff; }
+        a { text-decoration: none; color: #007BFF; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
+<div class="container">
     <h2>Search Attendance</h2>
-    <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    <p style="text-align:center;">
+        <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+    </p>
 
     <form method="POST">
-        Student: 
+        <label for="student_id">Student:</label>
         <select name="student_id" required>
             {% for s in students %}
-                <option value="{{ s.id }}" {% if selected_student and s.id==selected_student.id %}selected{% endif %}>{{ s.name }} ({{ s.id }})</option>
+                <option value="{{ s.id }}" {% if selected_student and s.id==selected_student.id %}selected{% endif %}>
+                    {{ s.name }} ({{ s.id }})
+                </option>
             {% endfor %}
         </select>
-        Date: <input type="date" name="date" value="{{ selected_date }}">
+
+        <label for="date">Date:</label>
+        <input type="date" name="date" value="{{ selected_date }}">
+
         <button type="submit">Search</button>
     </form>
 
     {% if records %}
-        <h3>Attendance Records:</h3>
-        <table border="1">
+        <h3>Attendance Records</h3>
+        <table>
             <tr>
                 <th>Date</th>
                 <th>Subject</th>
@@ -35,6 +58,9 @@
             </tr>
             {% endfor %}
         </table>
+    {% else %}
+        <p style="text-align:center; color:#555;">No records found for the selected student/date.</p>
     {% endif %}
+</div>
 </body>
 </html>
