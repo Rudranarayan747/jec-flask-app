@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - JEC</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
@@ -19,7 +19,7 @@
         .btn-add { background-color: #28a745; color: white; }
         .btn-upload { background-color: #17a2b8; color: white; }
         .btn-attendance { background-color: #ffc107; color: white; }
-        input { padding: 3px; width: 80px; }
+        input { padding: 3px; width: 90px; }
     </style>
 </head>
 <body>
@@ -45,6 +45,8 @@
                     <td>{{ notice.content }}</td>
                     <td>{{ notice.date_posted.strftime("%Y-%m-%d %H:%M") }}</td>
                 </tr>
+                {% else %}
+                <tr><td colspan="3">No notices yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -61,6 +63,7 @@
                     <th>Reg No</th>
                     <th>Name</th>
                     <th>Branch</th>
+                    <th>Section</th>
                     <th>Attendance %</th>
                     <th>Eligibility</th>
                     <th>Update</th>
@@ -72,18 +75,22 @@
                     <td>{{ s.student.id }}</td>
                     <td>{{ s.student.name }}</td>
                     <td>{{ s.student.branch }}</td>
+                    <td>{{ s.student.section }}</td>
                     <td>{{ "%.2f"|format(s.percent) }}%</td>
                     <td>{{ s.eligible }}</td>
                     <td>
                         <form method="POST" action="{{ url_for('update_student', student_id=s.student.id) }}">
                             <input type="text" name="name" value="{{ s.student.name }}" required>
                             <input type="text" name="branch" value="{{ s.student.branch }}" required>
+                            <input type="text" name="section" value="{{ s.student.section }}" required>
                             <input type="text" name="password" value="{{ s.student.password }}" required>
                             <input type="text" name="result" value="{{ s.student.result }}">
                             <button type="submit" class="btn btn-add">Update</button>
                         </form>
                     </td>
                 </tr>
+                {% else %}
+                <tr><td colspan="7">No students found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -111,6 +118,8 @@
                     <td>{{ file.uploaded_at.strftime("%Y-%m-%d %H:%M") }}</td>
                     <td><a href="{{ url_for('static', filename=file.filepath) }}" target="_blank">Download</a></td>
                 </tr>
+                {% else %}
+                <tr><td colspan="3">No files uploaded yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
