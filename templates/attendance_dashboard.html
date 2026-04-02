@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Attendance Dashboard</title>
+    <title>Admin - Attendance Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
@@ -22,8 +22,8 @@
     <h1>Admin - Attendance Dashboard</h1>
     <a href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
 
-    <!-- Load Students Form -->
-    <form method="POST" action="{{ url_for('attendance_dashboard') }}">
+    <!-- Branch & Date Selection Form -->
+    <form method="POST">
         <label for="branch">Select Branch:</label>
         <select name="branch" id="branch" required>
             <option value="">--Select Branch--</option>
@@ -40,13 +40,13 @@
     </form>
 
     {% if students %}
-    <!-- Submit Attendance Form -->
+    <!-- Attendance Submission Form -->
     <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
 
-        {% for s in students %}
-            <h3>{{ s.name }} ({{ s.id }}) - {{ s.branch }}</h3>
+        {% for student in students %}
+            <h3>{{ student.name }} ({{ student.id }}) - {{ student.branch }}</h3>
             <table>
                 <thead>
                     <tr>
@@ -56,7 +56,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if s.branch.lower() == 'cse' %}
+                    {% if student.branch.lower() == 'cse' %}
                         {% set subjects = ['Math','ETW','BME','Chem','BEE','EM'] %}
                     {% else %}
                         {% set subjects = ['PCDS','Math','UHV','BEE','Phy','BCE'] %}
@@ -67,7 +67,7 @@
                         <td>{{ period }}</td>
                         <td>{{ subj }}</td>
                         <td>
-                            <select name="status_{{ s.id }}_{{ subj }}">
+                            <select name="status_{{ student.id }}_{{ subj }}">
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
                             </select>
@@ -82,7 +82,7 @@
     </form>
     {% endif %}
 
-    <!-- Overall Summary -->
+    <!-- Overall Attendance Summary -->
     <h2>Overall Attendance Summary</h2>
     {% if overall_summary %}
     <table>
