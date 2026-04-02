@@ -1,31 +1,22 @@
+import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from sqlalchemy import extract
-from datetime import datetime
-import os
-import io
-import xlsxwriter
-from fpdf import FPDF
 
-# ---------------- Flask App ----------------
+# ---------------- App Config ----------------
+os.makedirs("instance", exist_ok=True)  # writable folder for Render
+os.makedirs(os.path.join("instance", "uploads"), exist_ok=True)
+
 app = Flask(__name__)
-
-# ---------------- Database setup ----------------
-# Ensure instance folder exists and is writable
-instance_path = os.path.join(os.getcwd(), "instance")
-os.makedirs(instance_path, exist_ok=True)
-db_path = os.path.join(instance_path, "jec.db")
-
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/jec.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "secret"
-app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+app.config["UPLOAD_FOLDER"] = os.path.join("instance", "uploads")
 
 db = SQLAlchemy(app)
-
-# ---------------- Login ----------------
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
@@ -52,6 +43,7 @@ class Attendance(db.Model):
     date = db.Column(db.Date, default=db.func.current_date())
     status = db.Column(db.String(10))
     subject = db.Column(db.String(100))
+    period = db.Column(db.String(50))  # ✅ Timetable period/slot
 
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,7 +55,7 @@ class UploadedFile(db.Model):
 def load_user(user_id):
     return Student.query.get(user_id)
 
-# ---------------- Utility ----------------
+# ---------------- Utilities ----------------
 def calculate_attendance_percentage(student_id, month=None, year=None, semester=None):
     query = Attendance.query.filter_by(student_id=student_id)
     if month and year:
@@ -86,6 +78,7 @@ def calculate_attendance_percentage(student_id, month=None, year=None, semester=
 def home():
     return render_template("index.html")
 
+# ---------------- Login & Logout ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -101,6 +94,13 @@ def login():
         flash("Invalid credentials", "danger")
     return render_template("login.html")
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
+# ---------------- Registration ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -124,12 +124,6 @@ def register():
 
     return render_template("register.html")
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("home"))
-
 # ---------------- Student Dashboard ----------------
 @app.route("/student")
 @login_required
@@ -148,70 +142,22 @@ def student_dashboard():
                            attendance=attendance_records, files=files,
                            percent=percent, eligible=eligible)
 
-# ---------------- Student Monthly Attendance ----------------
-@app.route("/student/monthly_attendance", methods=["GET", "POST"])
+# ---------------- Timetable-wise Attendance ----------------
+@app.route("/student/timetable_attendance")
 @login_required
-def student_attendance():
+def timetable_attendance():
     if current_user.role != "student":
         return "Access denied"
-
     student = Student.query.get(current_user.id)
-    attendance_records = Attendance.query.filter_by(student_id=student.id).all()
-
-    month = None
-    year = None
-    percent = None
-    eligible = None
-
-    if request.method == "POST":
-        month = int(request.form["month"])
-        year = int(request.form["year"])
-        filtered_records = [r for r in attendance_records if r.date.month == month and r.date.year == year]
-
-        percent = calculate_attendance_percentage(student.id, month=month, year=year)
-        eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-
-        return render_template(
-            "monthly_attendance.html",
-            student=student,
-            attendance=filtered_records,
-            month=month,
-            year=year,
-            percent=percent,
-            eligible=eligible
-        )
-
-    return render_template("monthly_attendance.html", student=student, attendance=attendance_records)
-
-# ---------------- Student Semester Attendance ----------------
-@app.route("/student/semester_attendance", methods=["GET", "POST"])
-@login_required
-def semester_attendance():
-    if current_user.role != "student":
-        return "Access denied"
-
-    student = Student.query.get(current_user.id)
-    attendance_records = Attendance.query.filter_by(student_id=student.id).all()
-
-    semester = None
-    percent = None
-    eligible = None
-
-    if request.method == "POST":
-        semester = request.form["semester"]
-        percent = calculate_attendance_percentage(student.id, semester=semester)
-        eligible = "Eligible for Exam" if percent >= 60 else "Not Eligible for Exam"
-
-        return render_template(
-            "semester_attendance.html",
-            student=student,
-            attendance=attendance_records,
-            semester=semester,
-            percent=percent,
-            eligible=eligible
-        )
-
-    return render_template("semester_attendance.html", student=student, attendance=attendance_records)
+    # Group by date and period
+    records = Attendance.query.filter_by(student_id=student.id).order_by(Attendance.date, Attendance.period).all()
+    timetable = {}
+    for r in records:
+        date_str = r.date.strftime("%Y-%m-%d")
+        if date_str not in timetable:
+            timetable[date_str] = []
+        timetable[date_str].append(r)
+    return render_template("timetable_attendance.html", student=student, timetable=timetable)
 
 # ---------------- Admin Dashboard ----------------
 @app.route("/admin")
@@ -229,14 +175,6 @@ def admin_dashboard():
         student_data.append({"student": s, "percent": percent, "eligible": eligible})
     return render_template("admin.html", notices=notices, students=student_data, files=files)
 
-# ---------------- Reset DB ----------------
-@app.route("/reset_db")
-def reset_db():
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-    return "Database reset successfully!"
-
 # ---------------- Initialize DB ----------------
 with app.app_context():
     db.create_all()
@@ -249,11 +187,11 @@ with app.app_context():
         ))
     if not Notice.query.first():
         db.session.add(Notice(
-            title="Upcoming Internal 1 Exam",
-            content="Internal 1 for 2nd Semester will be held from 24th March to 26th March."
+            title="Welcome Notice",
+            content="Welcome to the Attendance Management System."
         ))
     db.session.commit()
 
-# ---------------- Run ----------------
+# ---------------- Run App ----------------
 if __name__ == "__main__":
     app.run(debug=True)
