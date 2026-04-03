@@ -12,8 +12,11 @@
         th { background-color: #007BFF; color: #fff; }
         tr:nth-child(even) { background-color: #e9f0ff; }
         label { margin-right: 10px; }
-        button { padding: 8px 15px; background-color: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        button { padding: 8px 15px; background-color: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px; }
         button:hover { background-color: #218838; }
+        .eligible { color: green; font-weight: bold; }
+        .low { color: red; font-weight: bold; }
+        select { padding: 4px; }
     </style>
 </head>
 <body>
@@ -42,7 +45,6 @@
     <!-- Timetable Grid -->
     <h2>Timetable - Section {{ selected_section }}</h2>
     {% if selected_section == "A" %}
-        <!-- Section A Timetable -->
         <table>
             <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
             <tr><td>09:30–10:20</td><td>ETW</td><td>MATH</td><td>CHEM</td><td>CHEM</td><td>MATH</td><td>UHV</td></tr>
@@ -55,7 +57,6 @@
             <tr><td>02:50–04:30</td><td colspan="6">Labs (BE / CHEM / WDM / etc.)</td></tr>
         </table>
     {% elif selected_section == "B" %}
-        <!-- Section B Timetable -->
         <table>
             <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
             <tr><td>09:30–10:20</td><td>CHEM</td><td>UHV</td><td>MATH</td><td>MATH</td><td>CHEM</td><td>MATH</td></tr>
@@ -68,7 +69,6 @@
             <tr><td>02:50–04:30</td><td colspan="6">Labs (CREW / WDM / BE / etc.)</td></tr>
         </table>
     {% elif selected_section == "C" %}
-        <!-- Section C Timetable -->
         <table>
             <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
             <tr><td>09:30–10:20</td><td>MATH</td><td>MATH</td><td>ETW</td><td>BME</td><td>EM</td><td>BE</td></tr>
@@ -81,6 +81,7 @@
             <tr><td>02:50–04:30</td><td colspan="6">Labs (PHY / PCDS / BEE / etc.)</td></tr>
         </table>
     {% endif %}
+
     <!-- Subject-wise Attendance Summary -->
     <h2>Subject-wise Attendance Summary</h2>
     <table>
@@ -103,22 +104,28 @@
         <tr><td colspan="5">No attendance data available.</td></tr>
         {% endfor %}
     </table>
+
     <!-- Student Attendance -->
     <h2>Student Attendance - Section {{ selected_section }}</h2>
-    
+
+    <!-- Mark All Buttons -->
+    <div style="margin: 10px 0;">
+        <button type="button" onclick="markAll('Present')">✅ Mark All Present</button>
+        <button type="button" onclick="markAll('Absent')">❌ Mark All Absent</button>
+        <button type="button" onclick="markAll('Off')">➖ Mark All Off</button>
+    </div>
+
     <form method="POST" action="{{ url_for('submit_attendance') }}">
         <input type="hidden" name="branch" value="{{ selected_branch }}">
         <input type="hidden" name="section" value="{{ selected_section }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
-    
+
         <table>
             <tr>
                 <th>Reg No</th>
                 <th>Name</th>
                 <th>Attendance %</th>
                 <th>Eligibility</th>
-    
-                <!-- Show Period + Subject -->
                 {% for p in timetable %}
                 <th>
                     P{{ loop.index }}<br>
@@ -126,40 +133,43 @@
                 </th>
                 {% endfor %}
             </tr>
-    
+
             {% for s in students %}
             <tr>
                 <td>{{ s.id }}</td>
                 <td>{{ s.name }}</td>
-    
-                <!-- Attendance % -->
                 <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
-    
-                <!-- Eligibility -->
                 <td>
                     {% if overall_summary[loop.index0].percent >= 75 %}
-                        <span style="color:green;">Eligible</span>
+                        <span class="eligible">Eligible</span>
                     {% else %}
-                        <span style="color:red;">Low</span>
+                        <span class="low">Low</span>
                     {% endif %}
                 </td>
-    
-                <!-- Attendance Input -->
                 {% for p in timetable %}
                 <td>
                     <select name="status_{{ s.id }}_{{ p.id }}" required>
                         <option value="">--</option>
-                        <option value="Present">✅ P</option>
-                        <option value="Absent">❌ A</option>
-                        <option value="Off">➖ Off</option>
+                        <option value="Present" {% if attendance_map[s.id][p.id] == 'Present' %}selected{% endif %}>✅ P</option>
+                        <option value="Absent" {% if attendance_map[s.id][p.id] == 'Absent' %}selected{% endif %}>❌ A</option>
+                        <option value="Off" {% if attendance_map[s.id][p.id] == 'Off' %}selected{% endif %}>➖ Off</option>
                     </select>
                 </td>
                 {% endfor %}
             </tr>
             {% endfor %}
         </table>
-    
+
         <button type="submit">💾 Save Attendance</button>
     </form>
 
-    
+    <!-- JS Mark All -->
+    <script>
+    function markAll(value) {
+        document.querySelectorAll("select").forEach(select => {
+            select.value = value;
+        });
+    }
+    </script>
+</body>
+</html>
