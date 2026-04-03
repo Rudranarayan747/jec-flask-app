@@ -82,64 +82,84 @@
         </table>
     {% endif %}
     <!-- Subject-wise Attendance Summary -->
-<h2>Subject-wise Attendance Summary</h2>
-<table>
-    <tr>
-        <th>Period</th>
-        <th>Subject</th>
-        <th>Present</th>
-        <th>Absent</th>
-        <th>Off</th>
-    </tr>
-    {% for sub in subject_summary %}
-    <tr>
-        <td>{{ sub.period }}</td>
-        <td>{{ sub.subject }}</td>
-        <td>{{ sub.present }}</td>
-        <td>{{ sub.absent }}</td>
-        <td>{{ sub.off }}</td>
-    </tr>
-    {% else %}
-    <tr><td colspan="5">No attendance data available.</td></tr>
-    {% endfor %}
-</table>
-<!-- Student Attendance -->
-<h2>Student Attendance - Section {{ selected_section }}</h2>
-<form method="POST" action="{{ url_for('submit_attendance') }}">
-    <input type="hidden" name="branch" value="{{ selected_branch }}">
-    <input type="hidden" name="section" value="{{ selected_section }}">
-    <input type="hidden" name="date" value="{{ selected_date }}">
-
+    <h2>Subject-wise Attendance Summary</h2>
     <table>
         <tr>
-            <th>Reg No</th>
-            <th>Name</th>
-            <th>Attendance %</th>
-            <th>Eligibility</th>
-            {% for p in timetable %}
-            <th>{{ p.subject }}</th>
-            {% endfor %}
+            <th>Period</th>
+            <th>Subject</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Off</th>
         </tr>
-        {% for s in students %}
+        {% for sub in subject_summary %}
         <tr>
-            <td>{{ s.id }}</td>
-            <td>{{ s.name }}</td>
-            <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
-            <td>{{ overall_summary[loop.index0].eligible }}</td>
-            {% for p in timetable %}
-            <td>
-                <select name="status_{{ s.id }}_{{ p.id }}">
-                    <option value="">--</option>
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                    <option value="Off">Off</option>
-                </select>
-            </td>
-            {% endfor %}
+            <td>{{ sub.period }}</td>
+            <td>{{ sub.subject }}</td>
+            <td>{{ sub.present }}</td>
+            <td>{{ sub.absent }}</td>
+            <td>{{ sub.off }}</td>
         </tr>
+        {% else %}
+        <tr><td colspan="5">No attendance data available.</td></tr>
         {% endfor %}
     </table>
-    <button type="submit">Submit Attendance</button>
-</form>
+    <!-- Student Attendance -->
+    <h2>Student Attendance - Section {{ selected_section }}</h2>
+    
+    <form method="POST" action="{{ url_for('submit_attendance') }}">
+        <input type="hidden" name="branch" value="{{ selected_branch }}">
+        <input type="hidden" name="section" value="{{ selected_section }}">
+        <input type="hidden" name="date" value="{{ selected_date }}">
+    
+        <table>
+            <tr>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Attendance %</th>
+                <th>Eligibility</th>
+    
+                <!-- Show Period + Subject -->
+                {% for p in timetable %}
+                <th>
+                    P{{ loop.index }}<br>
+                    <small>{{ p.subject }}</small>
+                </th>
+                {% endfor %}
+            </tr>
+    
+            {% for s in students %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.name }}</td>
+    
+                <!-- Attendance % -->
+                <td>{{ overall_summary[loop.index0].percent|round(2) }}%</td>
+    
+                <!-- Eligibility -->
+                <td>
+                    {% if overall_summary[loop.index0].percent >= 75 %}
+                        <span style="color:green;">Eligible</span>
+                    {% else %}
+                        <span style="color:red;">Low</span>
+                    {% endif %}
+                </td>
+    
+                <!-- Attendance Input -->
+                {% for p in timetable %}
+                <td>
+                    <select name="status_{{ s.id }}_{{ p.id }}" required>
+                        <option value="">--</option>
+                        <option value="Present">✅ P</option>
+                        <option value="Absent">❌ A</option>
+                        <option value="Off">➖ Off</option>
+                    </select>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    
+        <button type="submit">💾 Save Attendance</button>
+    </form>
 
     
